@@ -152,7 +152,7 @@ uint Knn (vector<vector<double> > trainX, vector<uint> labelsX, vector<double> n
 		vecNormas[i].second = labelsX[i];
 	}
 	
-	for(uint i = 0; i < trainX.size(); i++) {//sort
+	for(uint i = 0; i < trainX.size(); i++) {//sort de menor a mayor segun las normas
 		double min = 255*255*92*112;
 		uint temp;
 		for(uint j = 0; j < vecNormas.size(); j++) {
@@ -166,7 +166,7 @@ uint Knn (vector<vector<double> > trainX, vector<uint> labelsX, vector<double> n
 	}
 	pair<uint,int> masRepetido;
 	masRepetido.second = 0;
-	for (uint i = 0; i < k; i++) {
+	for (uint i = 0; i < k; i++) {//calculo del mas repetido de los k vecinos mas cercanos
 		int repetidoTemp = 0;
 		for (uint j = 0; j < k; j++) {
 			if(sorted[j].second == i){
@@ -183,10 +183,34 @@ uint Knn (vector<vector<double> > trainX, vector<uint> labelsX, vector<double> n
 	return masRepetido.first;
 }
 
+vector<vector<double> > multMat( vector<vector<double> > mat1, vector<vector<double> > mat2) {
+	vector<vector<double> > res (mat1.size());
+	for (uint i = 0; i < mat1.size(); i++){
+		for (uint j = 0; j < mat2[0].size(); j++){
+			double acum = 0;
+			for (uint k = 0; k < mat1.size(); k++){
+				acum+= mat1[i][k]+mat2[k][j];
+			}
+			res[i][j] = acum;
+		}	
+
+	}
+	return res;
+}
+
+vector<vector<double> > PCA (vector<vector<double> > trainX, uint alpha) {
+	vector<vector<double> > res (trainX.size());
+	vector<vector<double> > Mx = calcularMx(trainX);
+	vector<vector<double> > V = trasponer(generarP(Mx));
+	for (uint i = 0; i < 92*112; i++){
+		V[i].erase(V[i].begin()+alpha, V[i].end());
+	}
+	return multMat(trainX,V);
+}
 
 int main(int argc, char * argv[]) {
 
-    if (argc != 3) {
+    if (argc != 5) {
         cout << "Modo de uso: tp2 archivo p\n";
     } else {
         string nombreArchivo = argv[1];
