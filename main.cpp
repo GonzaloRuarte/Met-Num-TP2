@@ -33,7 +33,6 @@ vector<vector<double> > obtenerX(vector<vector<double> > imgs, vector<double> &m
 	return res;
 }
 
-
 vector<vector<double> > calcularMx (const vector<vector<double> > &imgs) {
 	vector<double> medias = calcularMedias(imgs);
 	vector<vector<double> > X = obtenerX(imgs,medias);
@@ -153,7 +152,6 @@ pair<double,vector<double> > metodoPotencia(const vector<vector<double> > &M) {
 }
 
 
-
 vector<vector<double> > multMatEsc(const vector<vector<double> > &mat, double escalar) {//para multiplicar una matriz por un escalar
 	vector<vector<double> > res (mat.size());
 	for (uint i = 0; i<mat.size();i++) {
@@ -173,7 +171,6 @@ vector<vector<double> > multVec(const vector<double> &vec1) {//para generar una 
 	}
 	return res;
 }
-
 
 
 vector<vector<double> > sumMat(const vector<vector<double> > &mat1, const vector<vector<double> > &mat2) {//suma de matrices
