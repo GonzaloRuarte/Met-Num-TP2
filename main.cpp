@@ -278,11 +278,12 @@ int main(int argc, char * argv[]) {
         cout << "Modo de uso: tp2 -m <method> -i <train_set> -q <test_set> -o <classif>\n";
     } else {
 		vector<vector<double>>* dataSet = new vector<vector<double> >;
-		vector<uint>* labelsX = new vector<uint >;
+		vector<uint>* labelsX = new vector<uint > (41);
 		cargarDataSetEnMatriz("./ImagenesCaras",dataSet, labelsX);
 
 		//codigo que escribe 20 de las imagenes cargagas en el vector para corroborar que las imagenes se
 		// pasaron correctamente a la matriz
+
 		int ancho = 0;
 		int alto = 0;
 		string pathImagen = "./nomsal.pgm";

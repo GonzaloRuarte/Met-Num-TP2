@@ -130,10 +130,14 @@ void cargarDataSetEnMatriz(string pathAlDataSet, vector<vector<double>>* dataSet
     int ancho = 0;
     int alto = 0;
     stringvec listaImagenes;
+	stringvec listaDirectorios;
 
-    listarDirectorio(pathAlDataSet, listaImagenes);
+    listarDirectorio(pathAlDataSet, listaDirectorios);
+
+	listarImagenes(pathAlDataSet, listaImagenes);
+
     //copy(listaImagenes.begin(), listaImagenes.end(), ostream_iterator<string>(cout, "\n"));
-    getEtiquetas(&listaImagenes, labelsX);
+    getEtiquetas(&listaDirectorios, labelsX);
 
     /*string s = (etiquetas->find(44))->second;
     cout << s << endl;*/
