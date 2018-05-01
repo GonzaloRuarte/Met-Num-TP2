@@ -91,11 +91,11 @@ int getTamanoImagenes(string pathImagen, int *ancho, int *alto) {
 }
 
 
-void verificarMatrizAImagen(string pathImagen, int cantidadDeImagenes, int alto, int ancho, vector<vector<double>> dataSet) {
+void verificarMatrizAImagen(string pathImagen, int cantidadDeImagenes, int alto, int ancho, vector<vector<double>>* dataSet) {
     uchar* data = new uchar[cantidadDeImagenes*ancho*alto];
     int copiado = 0;
     for (int i=0; i<cantidadDeImagenes; i++) {
-        vectorADatos(dataSet[i], copiado, data);
+        vectorADatos((*dataSet)[i], copiado, data);
         copiado += ancho*alto;
     }
 
@@ -118,35 +118,31 @@ const vector<string> explode(const string& s, const char& c)
     return v;
 }
 
-void getEtiquetas(stringvec *listaImagenes, map<int, string> etiquetas) {
-    const char separador = '/';
+void getEtiquetas(stringvec *listaImagenes, vector<uint>* etiquetas) {
     for (uint i = 0; i < listaImagenes->size(); i++) {
-        etiquetas[i] = explode((*listaImagenes)[i], separador)[2];
+        (*etiquetas)[i] = i;
 
     }
 
 }
 
-vector<vector<double>>& cargarDataSetEnMatriz(string pathAlDataSet) {
+void cargarDataSetEnMatriz(string pathAlDataSet, vector<vector<double>>* dataSet, vector<uint>* labelsX) {
     int ancho = 0;
     int alto = 0;
-    vector<vector<double>> dataSet(0);
     stringvec listaImagenes;
 
-    listarImagenes(pathAlDataSet, listaImagenes);
+    listarDirectorio(pathAlDataSet, listaImagenes);
     //copy(listaImagenes.begin(), listaImagenes.end(), ostream_iterator<string>(cout, "\n"));
-    map<int, string> *etiquetas = new map<int, string>;
-    getEtiquetas(&listaImagenes, *etiquetas);
+    getEtiquetas(&listaImagenes, labelsX);
 
-    string s = (etiquetas->find(44))->second;
-    cout << s << endl;
+    /*string s = (etiquetas->find(44))->second;
+    cout << s << endl;*/
 
     int tamanoDeReferencia = getTamanoImagenes(listaImagenes[0], &ancho, &alto);
     //cout << tamanoDeReferencia << endl;
-    cargarDataSet(listaImagenes, tamanoDeReferencia, &dataSet);
+    cargarDataSet(listaImagenes, tamanoDeReferencia, dataSet);
 
 
-    return dataSet;
 }
 
 

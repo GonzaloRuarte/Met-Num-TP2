@@ -277,7 +277,9 @@ int main(int argc, char * argv[]) {
     if (!obtenerParametros(argc, argv, &metodo, &trainSet, &testSet, &classif)) {
         cout << "Modo de uso: tp2 -m <method> -i <train_set> -q <test_set> -o <classif>\n";
     } else {
-		vector<vector<double>> dataSet = cargarDataSetEnMatriz("./ImagenesCaras");
+		vector<vector<double>>* dataSet = new vector<vector<double> >;
+		vector<uint>* labelsX = new vector<uint >;
+		cargarDataSetEnMatriz("./ImagenesCaras",dataSet, labelsX);
 
 		//codigo que escribe 20 de las imagenes cargagas en el vector para corroborar que las imagenes se
 		// pasaron correctamente a la matriz
@@ -285,6 +287,8 @@ int main(int argc, char * argv[]) {
 		int alto = 0;
 		string pathImagen = "./nomsal.pgm";
 		verificarMatrizAImagen(pathImagen, 20, alto, ancho, dataSet);
+		delete labelsX;
+		delete dataSet;
 
     }
 
