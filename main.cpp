@@ -312,6 +312,8 @@ int main(int argc, char * argv[]) {
 		cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
 		uint x = Knn(*dataSet,*labelsX,(*dataSet)[71],1);
 		vector<vector<double>> asd = PCA(dataSet,6);
+
+        convertirMatrizAImagen("./salidaPCA", 10, &asd);
 		delete labelsX;
 		delete dataSet;
 

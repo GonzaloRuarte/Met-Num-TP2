@@ -17,12 +17,17 @@ typedef unsigned char uchar;
 
 using namespace std;
 
+int ancho = 0;
+int alto = 0;
 
 void listarDirectorio(const string& directorio, stringvec& v)
 {
     string nomArch;
     DIR* dirp = opendir(directorio.c_str());
     struct dirent * dp;
+    if (dirp == NULL) {
+        throw runtime_error("no se encontro directorio " + directorio + "!");
+    }
     while ((dp = readdir(dirp)) != NULL) {
         string nomArch = dp->d_name;
         if (nomArch.compare(".") != 0 && nomArch.compare("..") != 0)
@@ -91,7 +96,7 @@ int getTamanoImagenes(string pathImagen, int *ancho, int *alto) {
 }
 
 
-void verificarMatrizAImagen(string pathImagen, int cantidadDeImagenes, int alto, int ancho, vector<vector<double>>* dataSet) {
+void convertirMatrizAImagen(string pathImagen, int cantidadDeImagenes, vector<vector<double>>* dataSet) {
     uchar* data = new uchar[cantidadDeImagenes*ancho*alto];
     int copiado = 0;
     for (int i=0; i<cantidadDeImagenes; i++) {
@@ -127,8 +132,6 @@ void getEtiquetas(stringvec *listaImagenes, vector<uint>* etiquetas) {
 }
 
 void cargarDataSetEnMatriz(string pathAlDataSet, vector<vector<double>>* dataSet, vector<uint>* labelsX) {
-    int ancho = 0;
-    int alto = 0;
     stringvec listaImagenes;
 	stringvec listaDirectorios;
 
@@ -150,7 +153,6 @@ void cargarDataSetEnMatriz(string pathAlDataSet, vector<vector<double>>* dataSet
     // pasaron correctamente a la matriz
 
     string pathImagen = "./nomsal.pgm";
-    verificarMatrizAImagen(pathImagen, 20, alto, ancho, dataSet);
 }
 
 
