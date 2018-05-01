@@ -288,11 +288,12 @@ vector<vector<double> > multMat( vector<vector<double> > mat1, vector<vector<dou
 
 vector<vector<double> > PCA (vector<vector<double> >* trainX, uint alpha) {
 	cout << 1 << endl;
+	uint m = (*trainX)[0].size();
 	vector<vector<double> > Mx = calcularMx(trainX);
-	cout << 1 << endl;
+	cout << 2 << endl;
 	vector<vector<double> > V = trasponer(generarP(Mx));
-	cout << 1 << endl;
-	for (uint i = 0; i < 92*112; i++){
+	cout << 3 << endl;
+	for (uint i = 0; i < m; i++){
 		V[i].erase(V[i].begin()+alpha, V[i].end());
 	}
 	return multMat(*trainX,V);
@@ -308,7 +309,7 @@ int main(int argc, char * argv[]) {
 		vector<uint>* labelsX = new vector<uint > (41);
 		
 
-		cargarDataSetEnMatriz("./ImagenesCaras",dataSet, labelsX);
+		cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
 		uint x = Knn(*dataSet,*labelsX,(*dataSet)[71],1);
 		vector<vector<double>> asd = PCA(dataSet,6);
 		delete labelsX;
