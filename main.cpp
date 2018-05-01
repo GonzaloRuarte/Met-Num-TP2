@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <algorithm>
 #include "rdtsc.h"
+#include "util.h"
+#include <cmath>
 
 using namespace std;
 
@@ -269,12 +271,23 @@ vector<vector<double> > PCA (vector<vector<double> > trainX, uint alpha) {
 	return multMat(trainX,V);
 }
 
+
+
 int main(int argc, char * argv[]) {
 
     if (argc != 5) {
         cout << "Modo de uso: tp2 archivo p\n";
     } else {
         string nombreArchivo = argv[1];
+
+		vector<vector<double>> dataSet = cargarDataSetEnMatriz("./ImagenesCaras");
+
+		//codigo que escribe 20 de las imagenes cargagas en el vector para corroborar que las imagenes se
+		// pasaron correctamente a la matriz
+		int ancho = 0;
+		int alto = 0;
+		string pathImagen = "./nomsal.pgm";
+		verificarMatrizAImagen(pathImagen, 20, alto, ancho, dataSet);
 
     }
 
