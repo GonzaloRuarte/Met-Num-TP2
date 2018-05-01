@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <algorithm>
 #include "rdtsc.h"
+#include "util.h"
+#include <cmath>
 
 using namespace std;
 
@@ -270,13 +272,19 @@ vector<vector<double> > PCA (vector<vector<double> > trainX, uint alpha) {
 }
 
 int main(int argc, char * argv[]) {
+    string metodo, trainSet, testSet, classif;
 
-    if (argc != 5) {
-        cout << "Modo de uso: tp2 archivo p\n";
-    } else {
-        string nombreArchivo = argv[1];
+/*    if (!obtenerParametros(argc, argv, &metodo, &trainSet, &testSet, &classif)) {
+        cout << "Modo de uso: tp2 -m <method> -i <train_set> -q <test_set> -o <classif>\n";
+    } else {*/
+		vector<vector<double>>* dataSet = new vector<vector<double> >;
+		vector<uint>* labelsX = new vector<uint > (41);
+		cargarDataSetEnMatriz("./ImagenesCaras",dataSet, labelsX);
 
-    }
+		delete labelsX;
+		delete dataSet;
+
+    /*}*/
 
     return 0;
 }
