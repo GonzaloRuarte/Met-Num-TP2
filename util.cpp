@@ -148,3 +148,36 @@ vector<vector<double>>& cargarDataSetEnMatriz(string pathAlDataSet) {
 
     return dataSet;
 }
+
+
+
+//------------------------ Parseo de la entrada -------------------------------//
+
+bool contiene(char *argv[], const string *cadena) {
+    string param1 = argv[1], param2 = argv[3], param3 = argv[5], param4 = argv[5];
+    return param1.compare(*cadena) || param2.compare(*cadena) || param3.compare(*cadena) || param4.compare(*cadena);
+}
+
+string obtener(char *argv[], const string *cadena) {
+    string ret;
+    string param1 = argv[1], param2 = argv[3], param3 = argv[5], param4 = argv[5];
+    if (param1.compare(*cadena)) ret = argv[2];
+    if (param2.compare(*cadena)) ret = argv[4];
+    if (param3.compare(*cadena)) ret = argv[6];
+    if (param4.compare(*cadena)) ret = argv[7];
+    return ret;
+}
+
+bool obtenerParametros(int argc, char * argv[], string *metodo, string *trainSet, string *testSet, string *classif) {
+    bool ret = false;
+    const string param1 = "-m", param2 = "-i", param3 = "-q", param4 = "-o";
+
+    if (argc == 9 && contiene(argv, &param1) && contiene(argv, &param2) && contiene(argv, &param3) && contiene(argv, &param4)) {
+        *metodo = obtener(argv, &param1);
+        *trainSet = obtener(argv, &param2);
+        *testSet = obtener(argv, &param3);
+        *classif = obtener(argv, &param4);
+        ret = (metodo != NULL && trainSet != NULL && testSet != NULL && classif != NULL);
+    }
+    return ret;
+}

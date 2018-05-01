@@ -271,15 +271,12 @@ vector<vector<double> > PCA (vector<vector<double> > trainX, uint alpha) {
 	return multMat(trainX,V);
 }
 
-
-
 int main(int argc, char * argv[]) {
+    string metodo, trainSet, testSet, classif;
 
-    if (argc != 5) {
-        cout << "Modo de uso: tp2 archivo p\n";
+    if (!obtenerParametros(argc, argv, &metodo, &trainSet, &testSet, &classif)) {
+        cout << "Modo de uso: tp2 -m <method> -i <train_set> -q <test_set> -o <classif>\n";
     } else {
-        string nombreArchivo = argv[1];
-
 		vector<vector<double>> dataSet = cargarDataSetEnMatriz("./ImagenesCaras");
 
 		//codigo que escribe 20 de las imagenes cargagas en el vector para corroborar que las imagenes se
