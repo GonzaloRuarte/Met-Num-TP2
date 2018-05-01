@@ -11,9 +11,10 @@
 using namespace std;
 
 vector<double> calcularMedias(const vector<vector<double> > imgs) {
-	vector<double> res (112*92) ;
+	uint m = imgs[0].size();
+	vector<double> res (m) ;
 	double acum;
-	for (uint i = 0; i < 112*92; i++) {//itero sobre la cantidad de variables (cantidad de pixeles de cada imagen)
+	for (uint i = 0; i < m; i++) {//itero sobre la cantidad de variables (cantidad de pixeles de cada imagen)
 		acum = 0;
 		for (uint j = 0; j < imgs.size(); j++){//itero sobre la cantidad de imagenes (cantidad de muestras de cada variable)
 			acum += imgs[j][i];//acumulo todos los valores
@@ -28,9 +29,10 @@ vector<double> calcularMedias(const vector<vector<double> > imgs) {
 vector<vector<double> > obtenerX(vector<vector<double> > imgs, vector<double> medias){
 	vector<vector<double> > res (0);
 	uint n = imgs.size();
+	uint m = imgs[0].size();
 	for (uint j = 0; j < n; j++){
-		vector<double> temp (112*92);
-		for (uint i = 0; i < 112*92; i++) {
+		vector<double> temp (m);
+		for (uint i = 0; i < m; i++) {
 			temp[i] = imgs [j][i] - medias[i];//le resto la media correspondiente a cada variable
 		}
 		res.push_back(temp);
@@ -40,11 +42,10 @@ vector<vector<double> > obtenerX(vector<vector<double> > imgs, vector<double> me
 
 vector<vector<double> > calcularMx (const vector<vector<double> >* imgs) {
 	vector<double> medias = calcularMedias(*imgs);
-	cout << 2 << endl;
 	vector<vector<double> > X = obtenerX(*imgs,medias);
-	cout << 2 << endl;
 	vector<vector<double> > res (0);
 	const size_t& n = imgs->size();
+	uint m = (*imgs)[0].size();
 	/*double covar_ij;
 	for (uint i = 0; i < 112*92; i++){
         covar_ij = 0;
@@ -60,9 +61,9 @@ vector<vector<double> > calcularMx (const vector<vector<double> >* imgs) {
 		}
 	}*/
 	double acum;
-	for (uint i = 0; i < 112*92; i++){
-		vector<double> temp (112*92);
-		for (uint j = 0; j < 112*92; j++){
+	for (uint i = 0; i < m; i++){
+		vector<double> temp (m);
+		for (uint j = i; j < m; j++){
 			acum = 0;
 			for (uint k = 0; k < n; k++){
 				acum += X[k][i]*X[k][j]; //calculo de la sumatoria de productos para calcular varianza/covarianza
