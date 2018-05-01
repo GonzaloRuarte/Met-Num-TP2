@@ -53,7 +53,7 @@ void cargarDataSet(stringvec listaImagenes, int tamanoDeReferencia, vector<vecto
     int ancho = 0, alto = 0;
     uchar* datos = NULL;
     PPM_LOADER_PIXEL_TYPE pt = PPM_LOADER_PIXEL_TYPE_INVALID;
-    int i = 0;
+    uint i = 0;
 
     for (stringvec::iterator it = listaImagenes.begin() ; it != listaImagenes.end(); ++it) {
         string nombreArchivo = *it;
@@ -120,7 +120,7 @@ const vector<string> explode(const string& s, const char& c)
 
 void getEtiquetas(stringvec *listaImagenes, map<int, string> etiquetas) {
     const char separador = '/';
-    for (int i = 0; i < listaImagenes->size(); i++) {
+    for (uint i = 0; i < listaImagenes->size(); i++) {
         etiquetas[i] = explode((*listaImagenes)[i], separador)[2];
 
     }
