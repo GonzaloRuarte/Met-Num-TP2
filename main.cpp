@@ -293,6 +293,7 @@ vector<vector<double> > PCA (vector<vector<double> >* trainX, uint alpha) {
 	cout << 2 << endl;
 	vector<vector<double> > V = trasponer(generarP(Mx));
 	cout << 3 << endl;
+    convertirMatrizAImagen("./salidaVtraspuesta", 10, &V);
 	for (uint i = 0; i < m; i++){
 		V[i].erase(V[i].begin()+alpha, V[i].end());
 	}
@@ -313,7 +314,7 @@ int main(int argc, char * argv[]) {
 		uint x = Knn(*dataSet,*labelsX,(*dataSet)[71],1);
 		vector<vector<double>> asd = PCA(dataSet,6);
 
-        convertirMatrizAImagen("./salidaPCA", 10, &asd);
+
 		delete labelsX;
 		delete dataSet;
 
