@@ -10,7 +10,7 @@
 
 using namespace std;
 
-vector<double> calcularMedias(const vector<vector<double> > &imgs) {
+vector<double> calcularMedias(const vector<vector<double> > imgs) {
 	vector<double> res (112*92) ;
 	double acum;
 	for (uint i = 0; i < 112*92; i++) {//itero sobre la cantidad de variables (cantidad de pixeles de cada imagen)
@@ -25,40 +25,57 @@ vector<double> calcularMedias(const vector<vector<double> > &imgs) {
 	return res;
 }
 
-vector<vector<double> > obtenerX(vector<vector<double> > imgs, vector<double> &medias){
-	vector<vector<double> > res (112*92) ;
-	for (uint i = 0; i < 112*92; i++) {
-		for (uint j = 0; j < imgs.size(); j++){
-			imgs[j][i] -= medias[i];//le resto la media correspondiente a cada variable
+vector<vector<double> > obtenerX(vector<vector<double> > imgs, vector<double> medias){
+	vector<vector<double> > res (0);
+	uint n = imgs.size();
+	for (uint j = 0; j < n; j++){
+		vector<double> temp (112*92);
+		for (uint i = 0; i < 112*92; i++) {
+			temp[i] = imgs [j][i] - medias[i];//le resto la media correspondiente a cada variable
 		}
+		res.push_back(temp);
 	}
 	return res;
 }
 
-vector<vector<double> > calcularMx (const vector<vector<double> > &imgs) {
-	vector<double> medias = calcularMedias(imgs);
-	vector<vector<double> > X = obtenerX(imgs,medias);
-	vector<vector<double> > res (112*112*92*92);
-	const size_t& n = imgs.size();
-	double covar_ij;
+vector<vector<double> > calcularMx (const vector<vector<double> >* imgs) {
+	vector<double> medias = calcularMedias(*imgs);
+	cout << 2 << endl;
+	vector<vector<double> > X = obtenerX(*imgs,medias);
+	cout << 2 << endl;
+	vector<vector<double> > res (0);
+	const size_t& n = imgs->size();
+	/*double covar_ij;
 	for (uint i = 0; i < 112*92; i++){
         covar_ij = 0;
-        for (uint k = 0; k < imgs.size(); k++)
-            covar_ij += X[k][i]*X[k][i]; //calculo de la sumatoria de productos para calcular varianza
+        for (uint k = 0; k < imgs->size(); k++)
+            covar_ij += (*imgs)[k][i]*(*imgs)[k][i]; //calculo de la sumatoria de productos para calcular varianza
         res[i][i] = covar_ij/(n-1);
 		for (uint j = i+1; j < 112*92; j++){ //como la matriz es simetrica basta calcular la mitad superior.
             covar_ij = 0;
-			for (uint k = 0; k < imgs.size(); k++)
-                covar_ij += X[k][i]*X[k][j]; //calculo de la sumatoria de productos para calcular covarianza
+			for (uint k = 0; k < imgs->size(); k++)
+                covar_ij += (*imgs)[k][i]*(*imgs)[k][j]; //calculo de la sumatoria de productos para calcular covarianza
 			res[i][j] = covar_ij/(n-1);
 			res[j][i] = covar_ij/(n-1);
 		}
+	}*/
+	double acum;
+	for (uint i = 0; i < 112*92; i++){
+		vector<double> temp (112*92);
+		for (uint j = 0; j < 112*92; j++){
+			acum = 0;
+			for (uint k = 0; k < n; k++){
+				acum += X[k][i]*X[k][j]; //calculo de la sumatoria de productos para calcular varianza/covarianza
+			}
+			temp[j] = acum/(n-1);
+		}
+		res.push_back(temp);
 	}
 	return res;
 }
 
-vector<vector<double> > trasponer(const vector<vector<double> > &mat){
-	vector<vector<double> > res (mat.size());
+vector<vector<double> > trasponer(const vector<vector<double> > mat){
+	vector<vector<double> > res = mat;
 	for (uint i = 0; i<mat.size();i++)
 		for (uint j = 0; j<mat.size();j++)
 			res[i][j] = mat[j][i];
@@ -155,7 +172,7 @@ pair<double,vector<double> > metodoPotencia(const vector<vector<double> > &M) {
 
 
 vector<vector<double> > multMatEsc(const vector<vector<double> > &mat, double escalar) {//para multiplicar una matriz por un escalar
-	vector<vector<double> > res (mat.size());
+	vector<vector<double> > res = mat;
 	for (uint i = 0; i<mat.size();i++) {
 		for (uint j = 0; j<mat.size();j++) {
 			res[i][j] = mat[i][j]*escalar;
@@ -165,18 +182,21 @@ vector<vector<double> > multMatEsc(const vector<vector<double> > &mat, double es
 }
 
 vector<vector<double> > multVec(const vector<double> &vec1) {//para generar una matriz a partir de un vector y su traspuesto
-	vector<vector<double> > res (vec1.size()); //FALTA DECIR EL TAMAÑO DE LAS FILAS
-	for (uint i = 0; i<vec1.size();i++) {
-		for (uint j = 0; j<vec1.size();j++) {
-			res[i][j] = vec1[i]*vec1[j];
+	vector<vector<double> > res (0); 
+	uint n = vec1.size();
+	for (uint i = 0; i<n;i++) {
+		vector<double> temp (n);
+		for (uint j = 0; j<n;j++) {
+			temp[j] = vec1[i]*vec1[j];
 		}
+		res.push_back(temp);
 	}
 	return res;
 }
 
 
 vector<vector<double> > sumMat(const vector<vector<double> > &mat1, const vector<vector<double> > &mat2) {//suma de matrices
-	vector<vector<double> > res (mat1.size()); //FALTA DECIR EL TAMAÑO DE LAS FILAS
+	vector<vector<double> > res = mat1;
 	for (uint i = 0; i<mat1.size();i++) {
 		for (uint j = 0; j<mat1.size();j++) {
 			res[i][j] = mat1[i][j]+mat2[i][j];
@@ -205,17 +225,19 @@ vector<vector<double> > generarP(const vector<vector<double> > &mat){
 	return res;
 }
 
+
 uint Knn (vector<vector<double> > trainX, vector<uint> labelsX, vector<double> newImg, uint k) {//las labels podrian no ser un uint pero lo dejo asi en un principio
 	vector<pair<double,uint> > vecNormas (trainX.size());
-	vector<pair<double,uint> > sorted (trainX.size());
+	vector<pair<double,uint> > sorted (0);
 	double temp;
-	for (uint i = 0; i < trainX.size(); i++) {
-		temp = norma2(restaVec(trainX[i],newImg));
-		vecNormas[i].first = temp;
-		vecNormas[i].second = labelsX[i];
+	for (uint i = 0; i < labelsX.size(); i++) {
+		for(uint j = 0; j<10; j++){
+			temp = norma2(restaVec(trainX[i*10+j],newImg));
+			vecNormas[i*10+j].first = temp;
+			vecNormas[i*10+j].second = labelsX[i];
+		}
 	}
-	
-	for(uint i = 0; i < trainX.size(); i++) {//sort de menor a mayor segun las normas
+	for(uint i = 0; i < k; i++) {//sort de menor a mayor segun las normas
 		double min = 255*255*92*112;
 		uint temp;
 		for(uint j = 0; j < vecNormas.size(); j++) {
@@ -229,7 +251,7 @@ uint Knn (vector<vector<double> > trainX, vector<uint> labelsX, vector<double> n
 	}
 	pair<uint,int> masRepetido;
 	masRepetido.second = 0;
-	for (uint i = 0; i < k; i++) {//calculo del mas repetido de los k vecinos mas cercanos
+	for (uint i = 0; i < labelsX.size(); i++) {//calculo del mas repetido de los k vecinos mas cercanos
 		int repetidoTemp = 0;
 		for (uint j = 0; j < k; j++) {
 			if(sorted[j].second == i){
@@ -241,34 +263,38 @@ uint Knn (vector<vector<double> > trainX, vector<uint> labelsX, vector<double> n
 			masRepetido.first = i;
 		}
 	}
-	
-
 	return masRepetido.first;
 }
 
 vector<vector<double> > multMat( vector<vector<double> > mat1, vector<vector<double> > mat2) {
-	vector<vector<double> > res (mat1.size());
+	vector<vector<double> > res (0);
+	uint n = mat1.size();
+	uint m = mat2[0].size();
 	for (uint i = 0; i < mat1.size(); i++){
-		for (uint j = 0; j < mat2[0].size(); j++){
+		vector<double> temp (n);
+		for (uint j = 0; j < m; j++){
 			double acum = 0;
-			for (uint k = 0; k < mat1.size(); k++){
+			for (uint k = 0; k < n; k++){
 				acum+= mat1[i][k]+mat2[k][j];
 			}
-			res[i][j] = acum;
-		}	
+			temp[j] = acum;
+		}
+		res.push_back(temp);	
 
 	}
 	return res;
 }
 
-vector<vector<double> > PCA (vector<vector<double> > trainX, uint alpha) {
-	vector<vector<double> > res (trainX.size());
+vector<vector<double> > PCA (vector<vector<double> >* trainX, uint alpha) {
+	cout << 1 << endl;
 	vector<vector<double> > Mx = calcularMx(trainX);
+	cout << 1 << endl;
 	vector<vector<double> > V = trasponer(generarP(Mx));
+	cout << 1 << endl;
 	for (uint i = 0; i < 92*112; i++){
 		V[i].erase(V[i].begin()+alpha, V[i].end());
 	}
-	return multMat(trainX,V);
+	return multMat(*trainX,V);
 }
 
 int main(int argc, char * argv[]) {
@@ -279,8 +305,11 @@ int main(int argc, char * argv[]) {
     } else {*/
 		vector<vector<double>>* dataSet = new vector<vector<double> >;
 		vector<uint>* labelsX = new vector<uint > (41);
-		cargarDataSetEnMatriz("./ImagenesCaras",dataSet, labelsX);
+		
 
+		cargarDataSetEnMatriz("./ImagenesCaras",dataSet, labelsX);
+		uint x = Knn(*dataSet,*labelsX,(*dataSet)[71],1);
+		vector<vector<double>> asd = PCA(dataSet,6);
 		delete labelsX;
 		delete dataSet;
 
