@@ -146,7 +146,11 @@ void cargarDataSetEnMatriz(string pathAlDataSet, vector<vector<double>>* dataSet
     //cout << tamanoDeReferencia << endl;
     cargarDataSet(listaImagenes, tamanoDeReferencia, dataSet);
 
+    //codigo que escribe 20 de las imagenes cargagas en el vector para corroborar que las imagenes se
+    // pasaron correctamente a la matriz
 
+    string pathImagen = "./nomsal.pgm";
+    verificarMatrizAImagen(pathImagen, 20, alto, ancho, dataSet);
 }
 
 

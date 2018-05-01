@@ -274,24 +274,17 @@ vector<vector<double> > PCA (vector<vector<double> > trainX, uint alpha) {
 int main(int argc, char * argv[]) {
     string metodo, trainSet, testSet, classif;
 
-    if (!obtenerParametros(argc, argv, &metodo, &trainSet, &testSet, &classif)) {
+/*    if (!obtenerParametros(argc, argv, &metodo, &trainSet, &testSet, &classif)) {
         cout << "Modo de uso: tp2 -m <method> -i <train_set> -q <test_set> -o <classif>\n";
-    } else {
+    } else {*/
 		vector<vector<double>>* dataSet = new vector<vector<double> >;
 		vector<uint>* labelsX = new vector<uint > (41);
 		cargarDataSetEnMatriz("./ImagenesCaras",dataSet, labelsX);
 
-		//codigo que escribe 20 de las imagenes cargagas en el vector para corroborar que las imagenes se
-		// pasaron correctamente a la matriz
-
-		int ancho = 0;
-		int alto = 0;
-		string pathImagen = "./nomsal.pgm";
-		verificarMatrizAImagen(pathImagen, 20, alto, ancho, dataSet);
 		delete labelsX;
 		delete dataSet;
 
-    }
+    /*}*/
 
     return 0;
 }
