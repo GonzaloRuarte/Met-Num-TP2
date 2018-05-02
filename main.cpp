@@ -43,7 +43,7 @@ vector<vector<double> > obtenerX(vector<vector<double> > imgs, vector<double> me
 vector<vector<double> > calcularMx (const vector<vector<double> >* imgs) {
 	vector<double> medias = calcularMedias(*imgs);
 	vector<vector<double> > X = obtenerX(*imgs,medias);
-	vector<vector<double> > res (0);
+	vector<vector<double> > res ((*imgs)[0].size(), vector<double>((*imgs)[0].size()));
 	const size_t& n = imgs->size();
 	uint m = (*imgs)[0].size();
 	/*double covar_ij;
@@ -68,9 +68,9 @@ vector<vector<double> > calcularMx (const vector<vector<double> >* imgs) {
 			for (uint k = 0; k < n; k++){
 				acum += X[k][i]*X[k][j]; //calculo de la sumatoria de productos para calcular varianza/covarianza
 			}
-			temp[j] = acum/(n-1);
+			res[i][j] = acum/(n-1);
+			res[j][i] = acum/(n-1);
 		}
-		res.push_back(temp);
 	}
 	return res;
 }

@@ -14,7 +14,7 @@ function [ matriz_imagenes ] = importar_imagenes( tp2_folder )
         X = reshape(X',1,[]);
         matriz_imagenes = [matriz_imagenes; X];
     end
-    for suj_n = 1:41
+    for suj_n = 2:41
         subject_number = char(string(suj_n));
         for im_n = 1:10
             image_number = char(string(im_n)); %combierto el numero im_n en un string de numeros, y despues en un arreglo de chars.
