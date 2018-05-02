@@ -110,10 +110,11 @@ vector<double> mult_matr_por_vect(const vector<vector<double> > &M, const vector
     return res;
 }
 
-void normalizar1(vector<double>& v){     //Según norma 1
+double normalizar1(vector<double>& v){     //Según norma 1. Devuelve la norma 1 que tenía el vector.
     double norma = norma1(v);
     for(size_t i = 0; i < v.size(); ++i)
         v[i] = v[i]/norma;
+  return norma;
 }
 
 void normalizar2(vector<double>& v){     //Según norma 2
@@ -144,11 +145,9 @@ pair<double,vector<double> > metodoPotencia(const vector<vector<double> > &M) {
     double diferencia = 1;
     while(diferencia >= 0.000001){
         autovector_temp = mult_matr_por_vect(M, autovector);
-        norma_temp = norma1(autovector_temp);
-        autovalor_temp = norma_temp/norma;
+        autovalor_temp = normalizar1(autovector_temp);;    //En este paso debo ignorar la normalización
         autovector = mult_matr_por_vect(M, autovector_temp);
-        norma = norma1(autovector);
-        autovalor = norma/norma_temp;
+        autovalor = normalizar1(autovector);          //Debiese dividir por la norma de autovector_temp, pero es 1.
         diferencia = abs(autovalor - autovalor_temp);
     }
     size_t i = 0;
