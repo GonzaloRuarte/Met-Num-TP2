@@ -1,0 +1,14 @@
+function [ Mx ] = CalcularMxChicas( tp2_folder )
+%CALCULARMXCHICAS Le das la carpeta de las imagenes(en mi caso 
+%'~/Documents/MetNum/TP2/archivos_tp2/', o 
+%'/home/leandro/Documents/MetNum/TP2/archivos_tp2/'), y te calcula la matriz Mx
+%del TP2. Para imagenes chicas
+%   Usa las funciones importar imagenes, matriz Semivarianza y
+%   VectorMedias.
+    imgs = double(importar_imagenes_chicas(tp2_folder));
+    Vm = VectorMedias(imgs);
+    X = MatrizSemivarianza(imgs, Vm);
+    Mx = X' * X;
+
+end
+
