@@ -266,6 +266,19 @@ uint Knn (vector<vector<double> > trainX, vector<uint> labelsX, vector<double> n
 	return masRepetido.first;
 }
 
+double accuracy (vector<vector<double> > trainX, vector<uint> labelsX, vector<vector<double> > testY, vector<uint> labelsY, uint k) {
+	uint n = labelsY.size();
+	int acum = 0;
+	double res;
+	for (uint i = 0; i < n; i++) {
+		if (Knn(trainX,labelsX,testY[i],k) == labelsY[i]){
+			acum++;
+		}
+	}
+	res = acum/n;
+	return res;
+}	
+	
 vector<vector<double> > multMat( vector<vector<double> > mat1, vector<vector<double> > mat2) {
 	vector<vector<double> > res (0);
 	uint n = mat1.size();
