@@ -78,10 +78,10 @@ vector<vector<double> > calcularMx (const vector<vector<double> > imgs) {
 }
 
 vector<vector<double> > trasponer(const vector<vector<double> > mat){
-	vector<vector<double> > res = mat;
-	for (uint i = 0; i<mat.size();i++)
+	vector<vector<double> > res (mat[0].size());
+	for (uint i = 0; i<mat[0].size();i++)
 		for (uint j = 0; j<mat.size();j++)
-			res[i][j] = mat[j][i];
+			res[i].push_back(mat[j][i]);
 	return res;
 	
 }
@@ -272,10 +272,10 @@ vector<vector<double> > sumMat(const vector<vector<double> > &mat1, const vector
 	return res;
 }
 
-vector< pair<double,vector<double> > > deflacion(vector<vector<double> > mat) {
-	vector< pair<double,vector<double> > > res (mat.size());
+vector< pair<double,vector<double> > > deflacion(vector<vector<double> > mat, uint alpha) {
+	vector< pair<double,vector<double> > > res (alpha);
 	pair<double,vector<double> > autovTemp;
-	for (uint i = 0; i < mat.size(); i++){
+	for (uint i = 0; i < alpha; i++){
 		autovTemp = metodoPotencia(mat);
 		res[i] = autovTemp;
 		mat = sumMat(mat, multMatEsc(multVec(autovTemp.second),autovTemp.first*(-1)));
@@ -283,10 +283,10 @@ vector< pair<double,vector<double> > > deflacion(vector<vector<double> > mat) {
 	return res;
 }
 
-vector<vector<double> > generarP(const vector<vector<double> > &mat){
-	vector<vector<double> > res (mat.size());
-	vector< pair<double,vector<double> > > autovectores = deflacion(mat);
-	for (uint i = 0; i< mat.size(); i++){
+vector<vector<double> > generarP(const vector<vector<double> > &mat, uint alpha){
+	vector<vector<double> > res (alpha);
+	vector< pair<double,vector<double> > > autovectores = deflacion(mat,alpha);
+	for (uint i = 0; i< alpha; i++){
 		res[i] = autovectores[i].second;
 	}
 	return res;
@@ -399,7 +399,7 @@ vector<vector<double> > multMat( vector<vector<double> > mat1, vector<vector<dou
 vector<vector<double> > PCA (vector<vector<double> > trainX, uint alpha) {
 	uint m = trainX[0].size();
 	vector<vector<double> > Mx = calcularMx(trainX);
-	vector<vector<double> > V = trasponer(generarP(Mx));
+	vector<vector<double> > V = trasponer(generarP(Mx,alpha));
     convertirMatrizAImagen("./salidaVtraspuesta", 10, &V);
 	for (uint i = 0; i < m; i++){
 		V[i].erase(V[i].begin()+alpha, V[i].end());
@@ -439,9 +439,9 @@ vector<pair<vector<pair<double,double > >,double> > kFold (vector<vector<double>
 			}
 		}
 		//tengo armado el train y el test para este fold
-		vector<vector<double>> V = PCA(trainXTemp,6);
+		/*vector<vector<double>> V = PCA(trainXTemp,6);
 		trainXTemp = multMat(trainXTemp,V);
-		testYTemp = multMat(testYTemp,V);
+		testYTemp = multMat(testYTemp,V);*/
 		vector<pair<double,double > > precYRecallTemp;
 		for (uint j = 1; j < cantidadDeClases; j++){ //itero sobre las clases
 			double precisionTemp = precision(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,j,kdeKnn);
