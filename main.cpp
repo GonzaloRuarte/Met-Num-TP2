@@ -298,11 +298,9 @@ uint Knn (vector<vector<double> > trainX, vector<uint> labelsX, vector<double> n
 	vector<pair<double,uint> > sorted (0);
 	double temp;
 	for (uint i = 0; i < labelsX.size(); i++) {
-		for(uint j = 0; j<10; j++){
-			temp = norma2(restaVec(trainX[i*10+j],newImg));
-			vecNormas[i*10+j].first = temp;
-			vecNormas[i*10+j].second = labelsX[i];
-		}
+		temp = norma2(restaVec(trainX[i],newImg));
+		vecNormas[i].first = temp;
+		vecNormas[i].second = labelsX[i];
 	}
 	for(uint i = 0; i < k; i++) {//sort de menor a mayor segun las normas
 		double min = 255*255*92*112;
@@ -335,26 +333,26 @@ uint Knn (vector<vector<double> > trainX, vector<uint> labelsX, vector<double> n
 
 double accuracy (vector<vector<double> > trainX, vector<uint> labelsX, vector<vector<double> > testY, vector<uint> labelsY, uint k) {
 	uint n = labelsY.size(); //me di cuenta que si vamos a usar como label el numero de fila dentro de la matriz entonces el labelsY de mucho no nos sirve pero bueno
-	int acum = 0;
+	double acum = 0;
 	double res;
 	for (uint i = 0; i < n; i++) {
 		if (Knn(trainX,labelsX,testY[i],k) == labelsY[i]){
 			acum++;
 		}
 	}
-	res = acum/(n*m);
+	res = acum/n;
 	return res;
 }	
 
-double precision(vector<vector<double> > trainX, vector<uint> labelsX, vector<vector<double> > testY, vector<uint> labelsY, uint class, uint k) {
+double precision(vector<vector<double> > trainX, vector<uint> labelsX, vector<vector<double> > testY, vector<uint> labelsY, uint clase, uint k) {
 	uint n = labelsY.size();
-	int truepositives = 0, positives = 0;
+	double truepositives = 0, positives = 0;
 	double res;
 	for (uint i = 0; i < n; i++) {
-		uint Knn = Knn(trainX,labelsX,testY[i],k);
-		if (Knn == class){ //si el Knn dio igual a la clase que estoy procesando entonces sumo 1 a los elementos recuperados
+		uint Knnres = Knn(trainX,labelsX,testY[i],k);
+		if (Knnres == clase){ //si el Knn dio igual a la clase que estoy procesando entonces sumo 1 a los elementos recuperados
 			positives++;
-			if (Knn == labelsY[i]){ //si el Knn ademas dio bien el resultado sumo 1 a los true positives
+			if (Knnres == labelsY[i]){ //si el Knn ademas dio bien el resultado sumo 1 a los true positives
 				truepositives++;
 			}
 		}
@@ -363,14 +361,14 @@ double precision(vector<vector<double> > trainX, vector<uint> labelsX, vector<ve
 	return res;
 }
 
-double recall(vector<vector<double> > trainX, vector<uint> labelsX, vector<vector<double> > testY, vector<uint> labelsY, uint class, uint k) {
+double recall(vector<vector<double> > trainX, vector<uint> labelsX, vector<vector<double> > testY, vector<uint> labelsY, uint clase, uint k) {
 	uint n = labelsY.size();
-	int truepositives = 0, relevants = 0;
+	double truepositives = 0, relevants = 0;
 	double res;
 	for (uint i = 0; i < n; i++) {
-		if (labelsY[i] == class){//si el elemento que estoy analizando pertenece a la clase que estoy procesando, sumo 1 a los relevantes
+		if (labelsY[i] == clase){//si el elemento que estoy analizando pertenece a la clase que estoy procesando, sumo 1 a los relevantes
 		 	relevants++;
-			if (Knn(trainX,labelsX,testY[i],k) == class){ //si el Knn ademas dio bien el resultado sumo 1 a los true positives
+			if (Knn(trainX,labelsX,testY[i],k) == clase){ //si el Knn ademas dio bien el resultado sumo 1 a los true positives
 				truepositives++;
 			}
 		}
@@ -399,7 +397,7 @@ vector<vector<double> > multMat( vector<vector<double> > mat1, vector<vector<dou
 }
 
 vector<vector<double> > PCA (vector<vector<double> >* trainX, uint alpha) {
-	if (alpha > trainX.size();) {return *trainX;}//agrego esto para poder decidir facilmente si usar PCA o no (si no quiero usarlo le paso como alpha el size+1)
+	if (alpha > trainX->size()) {return *trainX;}//agrego esto para poder decidir facilmente si usar PCA o no (si no quiero usarlo le paso como alpha el size+1)
 	uint m = (*trainX)[0].size();
 	vector<vector<double> > Mx = calcularMx(trainX);
 	vector<vector<double> > V = trasponer(generarP(Mx));
@@ -411,11 +409,12 @@ vector<vector<double> > PCA (vector<vector<double> >* trainX, uint alpha) {
 }
 vector<pair<vector<pair<double,double > >,double> > kFold (vector<vector<double> > trainX, vector<uint> labelsX, uint k, uint kdeKnn, uint alpha) {
 	uint imagenesPorPersona = 10; //esto podria variar si cambiamos el trainX
+	int imagenesPPparagenerador = 10; //es el mismo numero de arriba pero lo uso para generar numeros aleatorios
 	uint cantidadDeClases = 41; // idem arriba
 	vector<int> folds; //to store the random numbers
 	random_device rd; //seed generator
 	mt19937_64 generator{rd()}; //generator initialized with seed from rd
-	uniform_int_distribution<> dist{0, imagenesPorPersona-1}; //the range is inclusive, so this produces numbers in range [0, 10)
+	uniform_int_distribution<> dist{0, imagenesPPparagenerador-1}; //the range is inclusive, so this produces numbers in range [0, 10)
 	for(uint i=0; i<imagenesPorPersona; ++i) {
 		folds.push_back( dist(generator) );
 	} // la idea es que voy a tener muestras balanceadas, entonces para cada persona voy a tener la misma cantidad de imagenes en test y en train
@@ -425,11 +424,11 @@ vector<pair<vector<pair<double,double > >,double> > kFold (vector<vector<double>
 	for(uint i = 0; i<k; i++){ //itero sobre la cantidad de folds
 		vector<vector<double> > trainXTemp;
 		vector<vector<double> > testYTemp;
-		vector<vector<double> > labelsXTemp;
-		vector<vector<double> > labelsYTemp;
+		vector<uint> labelsXTemp;
+		vector<uint> labelsYTemp;
 		for (uint j = 0; j < n; j++){ //itero sobre la cantidad de personas
 			for (uint u = 0; u < imagenesPorPersona; u++) {//itero sobre la cantidad de imagenes por persona
-				temp = j*imagenesPorPersona+folds[u];
+				uint temp = (j*imagenesPorPersona)+folds[u];
 				if (u >= i*imagenesPorPersona/k && u < (i+1)*imagenesPorPersona/k){ //si estoy en el fold que quiero
 					testYTemp.push_back(trainX[temp]);
 					labelsYTemp.push_back(labelsX[temp]); //agrego el elemento a test
@@ -443,7 +442,10 @@ vector<pair<vector<pair<double,double > >,double> > kFold (vector<vector<double>
 		//tengo armado el train y el test para este fold, falta decidir si hacer PCA o no pero no recuerdo como hay que hacer con test
 		vector<pair<double,double > > precYRecallTemp;
 		for (uint j = 1; j < cantidadDeClases; j++){ //itero sobre las clases
-			precYRecallTemp.push_back(make_pair(precision(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,j,kdeKnn),recall(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,j,kdeKnn)));
+			double precisionTemp = precision(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,j,kdeKnn);
+			double recallTemp = recall(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,j,kdeKnn);
+			pair<double,double > pairTemp = make_pair(precisionTemp,recallTemp);
+			precYRecallTemp.push_back(pairTemp);
 		}//entonces en el vector la posicion 0 corresponde a la clase 1 y asi sucesivamente
 		double accuracyTemp = accuracy(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,kdeKnn);
 		res.push_back(make_pair(precYRecallTemp,accuracyTemp));
@@ -464,6 +466,8 @@ int main(int argc, char * argv[]) {
 
 
 		cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
+		
+		//vector<pair<vector<pair<double,double > >,double> > dasdsa = kFold(*dataSet,*labelsX,5,2,6);
 		uint x = Knn(*dataSet,*labelsX,(*dataSet)[71],1);
 		vector<vector<double>> asd = PCA(dataSet,6);
 
