@@ -332,6 +332,52 @@ uint Knn (vector<vector<double> > trainX, vector<uint> labelsX, vector<double> n
 	return masRepetido.first;
 }
 
+double accuracy (vector<vector<double> > trainX, vector<uint> labelsX, vector<vector<double> > testY, vector<uint> labelsY, uint k) {
+	uint n = labelsY.size();
+	int acum = 0;
+	double res;
+	for (uint i = 0; i < n; i++) {
+		if (Knn(trainX,labelsX,testY[i],k) == labelsY[i]){
+			acum++;
+		}
+	}
+	res = acum/n;
+	return res;
+}	
+
+double precision(vector<vector<double> > trainX, vector<uint> labelsX, vector<vector<double> > testY, vector<uint> labelsY, uint class, uint k) {
+	uint n = labelsY.size();
+	int truepositives = 0, positives = 0;
+	double res;
+	for (uint i = 0; i < n; i++) {
+		uint Knn = Knn(trainX,labelsX,testY[i],k);
+		if (Knn == class){ //si el Knn dio igual a la clase que estoy procesando entonces sumo 1 a los elementos recuperados
+			positives++;
+			if (Knn == labelsY[i]){ //si el Knn ademas dio bien el resultado sumo 1 a los true positives
+				truepositives++;
+			}
+		}
+	}
+	res = truepositives/positives;
+	return res;
+}
+
+double recall(vector<vector<double> > trainX, vector<uint> labelsX, vector<vector<double> > testY, vector<uint> labelsY, uint class, uint k) {
+	uint n = labelsY.size();
+	int truepositives = 0, relevants = 0;
+	double res;
+	for (uint i = 0; i < n; i++) {
+		if (testY[i] == class){ //si el elemento que estoy analizando pertenece a la clase que estoy procesando, sumo 1 a los relevantes
+			relevants++;
+			if (Knn(trainX,labelsX,testY[i],k) == labelsY[i]){ //si el Knn ademas dio bien el resultado sumo 1 a los true positives
+				truepositives++;
+			}
+		}
+	}
+	res = truepositives/relevants;
+	return res;
+}
+
 vector<vector<double> > multMat( vector<vector<double> > mat1, vector<vector<double> > mat2) {
 	vector<vector<double> > res (0);
 	uint n = mat1.size();
