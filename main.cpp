@@ -42,12 +42,12 @@ vector<vector<double> > obtenerX(vector<vector<double> > imgs, vector<double> me
 	return res;
 }
 
-vector<vector<double> > calcularMx (const vector<vector<double> >* imgs) {
-	vector<double> medias = calcularMedias(*imgs);
-	vector<vector<double> > X = obtenerX(*imgs,medias);
-	vector<vector<double> > res ((*imgs)[0].size(), vector<double>((*imgs)[0].size()));
-	const size_t& n = imgs->size();
-	uint m = (*imgs)[0].size();
+vector<vector<double> > calcularMx (const vector<vector<double> > imgs) {
+	vector<double> medias = calcularMedias(imgs);
+	vector<vector<double> > X = obtenerX(imgs,medias);
+	vector<vector<double> > res (imgs[0].size(), vector<double>(imgs[0].size()));
+	const size_t& n = imgs.size();
+	uint m = imgs[0].size();
 	/*double covar_ij;
 	for (uint i = 0; i < 112*92; i++){
         covar_ij = 0;
@@ -396,16 +396,15 @@ vector<vector<double> > multMat( vector<vector<double> > mat1, vector<vector<dou
 	return res;
 }
 
-vector<vector<double> > PCA (vector<vector<double> >* trainX, uint alpha) {
-	if (alpha > trainX->size()) {return *trainX;}//agrego esto para poder decidir facilmente si usar PCA o no (si no quiero usarlo le paso como alpha el size+1)
-	uint m = (*trainX)[0].size();
+vector<vector<double> > PCA (vector<vector<double> > trainX, uint alpha) {
+	uint m = trainX[0].size();
 	vector<vector<double> > Mx = calcularMx(trainX);
 	vector<vector<double> > V = trasponer(generarP(Mx));
     convertirMatrizAImagen("./salidaVtraspuesta", 10, &V);
 	for (uint i = 0; i < m; i++){
 		V[i].erase(V[i].begin()+alpha, V[i].end());
 	}
-	return multMat(*trainX,V);
+	return V; //devuelvo la V, recordar multiplicar fuera de la funcion
 }
 vector<pair<vector<pair<double,double > >,double> > kFold (vector<vector<double> > trainX, vector<uint> labelsX, uint k, uint kdeKnn, uint alpha) {
 	uint imagenesPorPersona = 10; //esto podria variar si cambiamos el trainX
@@ -439,7 +438,10 @@ vector<pair<vector<pair<double,double > >,double> > kFold (vector<vector<double>
 
 			}
 		}
-		//tengo armado el train y el test para este fold, falta decidir si hacer PCA o no pero no recuerdo como hay que hacer con test
+		//tengo armado el train y el test para este fold
+		vector<vector<double>> V = PCA(trainXTemp,6);
+		trainXTemp = multMat(trainXTemp,V);
+		testYTemp = multMat(testYTemp,V);
 		vector<pair<double,double > > precYRecallTemp;
 		for (uint j = 1; j < cantidadDeClases; j++){ //itero sobre las clases
 			double precisionTemp = precision(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,j,kdeKnn);
@@ -467,9 +469,8 @@ int main(int argc, char * argv[]) {
 
 		cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
 		
-		//vector<pair<vector<pair<double,double > >,double> > dasdsa = kFold(*dataSet,*labelsX,5,2,6);
-		uint x = Knn(*dataSet,*labelsX,(*dataSet)[71],1);
-		vector<vector<double>> asd = PCA(dataSet,6);
+		vector<pair<vector<pair<double,double > >,double> > dasdsa = kFold(*dataSet,*labelsX,5,2,6);
+		
 
 
 		delete labelsX;
