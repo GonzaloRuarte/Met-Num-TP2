@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <tuple>
+#include <random>
 #include <stdlib.h>
 #include <algorithm>
 #include "rdtsc.h"
@@ -398,19 +399,57 @@ vector<vector<double> > multMat( vector<vector<double> > mat1, vector<vector<dou
 }
 
 vector<vector<double> > PCA (vector<vector<double> >* trainX, uint alpha) {
-	cout << 1 << endl;
+	if (alpha > trainX.size();) {return *trainX;}//agrego esto para poder decidir facilmente si usar PCA o no (si no quiero usarlo le paso como alpha el size+1)
 	uint m = (*trainX)[0].size();
 	vector<vector<double> > Mx = calcularMx(trainX);
-	cout << 2 << endl;
 	vector<vector<double> > V = trasponer(generarP(Mx));
-	cout << 3 << endl;
     convertirMatrizAImagen("./salidaVtraspuesta", 10, &V);
 	for (uint i = 0; i < m; i++){
 		V[i].erase(V[i].begin()+alpha, V[i].end());
 	}
 	return multMat(*trainX,V);
 }
+vector<pair<vector<pair<double,double > >,double> > kFold (vector<vector<double> > trainX, vector<uint> labelsX, uint k, uint kdeKnn, uint alpha) {
+	uint imagenesPorPersona = 10; //esto podria variar si cambiamos el trainX
+	uint cantidadDeClases = 41; // idem arriba
+	vector<int> folds; //to store the random numbers
+	random_device rd; //seed generator
+	mt19937_64 generator{rd()}; //generator initialized with seed from rd
+	uniform_int_distribution<> dist{0, imagenesPorPersona-1}; //the range is inclusive, so this produces numbers in range [0, 10)
+	for(uint i=0; i<imagenesPorPersona; ++i) {
+		folds.push_back( dist(generator) );
+	} // la idea es que voy a tener muestras balanceadas, entonces para cada persona voy a tener la misma cantidad de imagenes en test y en train
+		// como cada persona tiene 10 imagenes, el k puede ser 1, 2, 5 o 10, k = 1 no tiene mucho sentido
+	uint n = trainX.size()/imagenesPorPersona; //n es la cantidad de personas
+	vector<pair<vector<pair<double,double > >,double> > res;
+	for(uint i = 0; i<k; i++){ //itero sobre la cantidad de folds
+		vector<vector<double> > trainXTemp;
+		vector<vector<double> > testYTemp;
+		vector<vector<double> > labelsXTemp;
+		vector<vector<double> > labelsYTemp;
+		for (uint j = 0; j < n; j++){ //itero sobre la cantidad de personas
+			for (uint u = 0; u < imagenesPorPersona; u++) {//itero sobre la cantidad de imagenes por persona
+				temp = j*imagenesPorPersona+folds[u];
+				if (u >= i*imagenesPorPersona/k && u < (i+1)*imagenesPorPersona/k){ //si estoy en el fold que quiero
+					testYTemp.push_back(trainX[temp]);
+					labelsYTemp.push_back(labelsX[temp]); //agrego el elemento a test
+				} else{ 
+					trainXTemp.push_back(trainX[temp]);
+					labelsXTemp.push_back(labelsX[temp]); //agrego el elemento a train
+				}
 
+			}
+		}
+		//tengo armado el train y el test para este fold, falta decidir si hacer PCA o no pero no recuerdo como hay que hacer con test
+		vector<pair<double,double > > precYRecallTemp;
+		for (uint j = 1; j < cantidadDeClases; j++){ //itero sobre las clases
+			precYRecallTemp.push_back(make_pair(precision(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,j,kdeKnn),recall(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,j,kdeKnn)));
+		}//entonces en el vector la posicion 0 corresponde a la clase 1 y asi sucesivamente
+		double accuracyTemp = accuracy(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,kdeKnn);
+		res.push_back(make_pair(precYRecallTemp,accuracyTemp));
+	}
+	return res;	
+}
 int main(int argc, char * argv[]) {
     string metodo, trainSet, testSet, classif;
     salida.open("Comparación_de_algoritmos.txt", ios_base::app);
