@@ -333,15 +333,18 @@ uint Knn (vector<vector<double> > trainX, vector<uint> labelsX, vector<double> n
 }
 
 double accuracy (vector<vector<double> > trainX, vector<uint> labelsX, vector<vector<double> > testY, vector<uint> labelsY, uint k) {
-	uint n = labelsY.size();
+	uint n = labelsY.size(); //me di cuenta que si vamos a usar como label el numero de fila dentro de la matriz entonces el labelsY de mucho no nos sirve pero bueno
+	uint m = testY[0].size(); //asumo que las muestras van a estar balanceadas, sino vamos a tener que usar iterador, lo mismo para precision
 	int acum = 0;
 	double res;
 	for (uint i = 0; i < n; i++) {
-		if (Knn(trainX,labelsX,testY[i],k) == labelsY[i]){
-			acum++;
+		for (uint j = 0; i< m; j++){
+			if (Knn(trainX,labelsX,testY[i][j],k) == labelsY[i]){
+				acum++;
+			}
 		}
 	}
-	res = acum/n;
+	res = acum/(n*m);
 	return res;
 }	
 
@@ -350,11 +353,13 @@ double precision(vector<vector<double> > trainX, vector<uint> labelsX, vector<ve
 	int truepositives = 0, positives = 0;
 	double res;
 	for (uint i = 0; i < n; i++) {
-		uint Knn = Knn(trainX,labelsX,testY[i],k);
-		if (Knn == class){ //si el Knn dio igual a la clase que estoy procesando entonces sumo 1 a los elementos recuperados
-			positives++;
-			if (Knn == labelsY[i]){ //si el Knn ademas dio bien el resultado sumo 1 a los true positives
-				truepositives++;
+		for (uint j = 0; i< m; j++){
+			uint Knn = Knn(trainX,labelsX,testY[i][j],k);
+			if (Knn == class){ //si el Knn dio igual a la clase que estoy procesando entonces sumo 1 a los elementos recuperados
+				positives++;
+				if (Knn == labelsY[i]){ //si el Knn ademas dio bien el resultado sumo 1 a los true positives
+					truepositives++;
+				}
 			}
 		}
 	}
@@ -363,15 +368,13 @@ double precision(vector<vector<double> > trainX, vector<uint> labelsX, vector<ve
 }
 
 double recall(vector<vector<double> > trainX, vector<uint> labelsX, vector<vector<double> > testY, vector<uint> labelsY, uint class, uint k) {
-	uint n = labelsY.size();
+	uint m = testY[class].size();//itero sobre los elementos de la clase que voy a tomar como relevante
 	int truepositives = 0, relevants = 0;
 	double res;
-	for (uint i = 0; i < n; i++) {
-		if (testY[i] == class){ //si el elemento que estoy analizando pertenece a la clase que estoy procesando, sumo 1 a los relevantes
-			relevants++;
-			if (Knn(trainX,labelsX,testY[i],k) == labelsY[i]){ //si el Knn ademas dio bien el resultado sumo 1 a los true positives
-				truepositives++;
-			}
+	for (uint i = 0; i < m; i++) {//si el elemento que estoy analizando pertenece a la clase que estoy procesando, sumo 1 a los relevantes
+		relevants++;
+		if (Knn(trainX,labelsX,testY[class][i],k) == class){ //si el Knn ademas dio bien el resultado sumo 1 a los true positives
+			truepositives++;
 		}
 	}
 	res = truepositives/relevants;
