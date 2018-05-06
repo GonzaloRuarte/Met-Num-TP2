@@ -7,6 +7,7 @@
 #include "rdtsc.h"
 #include "util.h"
 #include <cmath>
+#include <chrono>
 
 using namespace std;
 
@@ -110,6 +111,17 @@ vector<double> mult_matr_por_vect(const vector<vector<double> > &M, const vector
     return res;
 }
 
+double producto_interno(const vector<double> &v, const vector<double> &v2){
+    double res = 0;
+    if(v.size() != v2.size())
+      std::cout << "producto_interno: los vectores no son del mismo tamaño" << std::endl;
+    else{
+      for(size_t i = 0; i < v.size(); ++i)
+        res += v[i]*v2[i];
+    }
+  return res;
+}
+
 double normalizar1(vector<double>& v){     //Según norma 1. Devuelve la norma 1 que tenía el vector.
     double norma = norma1(v);
     for(size_t i = 0; i < v.size(); ++i)
@@ -130,44 +142,98 @@ vector<double> restaVec(const vector<double> &vec1, const vector<double> &vec2) 
     return res;
 }
 
+ofstream salida("Comparación_de_algoritmos.txt", ios_base::out);
 pair<double,vector<double> > metodoPotencia(const vector<vector<double> > &M) {
     const size_t& n = M[0].size();
-	pair<double,vector<double> > res;
+    //algoritmo 1:
+    pair<double,vector<double> > res;
 	double& autovalor = res.first;
     double autovalor_temp;
     vector<double>& autovector = res.second;
     autovector = vector<double>(n,0);
     autovector[0] = 1;   //Empieza siendo e1.
-    double norma = 1;
     vector<double> autovector_temp;
-    double norma_temp;
     //Cálculo del autovalor:
     double diferencia = 1;
+    float cantidad_iteraciones = 0;
+    auto t1 = chrono::system_clock::now();
     while(diferencia >= 0.000001){
         autovector_temp = mult_matr_por_vect(M, autovector);
-        autovalor_temp = normalizar1(autovector_temp);;    //En este paso debo ignorar la normalización
+        autovalor_temp = normalizar1(autovector_temp);    //En este paso debo ignorar la normalización
         autovector = mult_matr_por_vect(M, autovector_temp);
-        autovalor = normalizar1(autovector);          //Debiese dividir por la norma de autovector_temp, pero es 1.
+        autovalor = normalizar1(autovector);              //Debiese dividir por la norma de autovector_temp, pero es 1.
         diferencia = abs(autovalor - autovalor_temp);
+        ++cantidad_iteraciones;
     }
+    auto t2 = chrono::system_clock::now();
     size_t i = 0;
     while(autovector[i] == 0 || autovector_temp[i] == 0)
         ++i;
-    if(abs(autovector[i] + autovector_temp[i]) < abs(autovector[i] - autovector_temp[i]))   //Si tienen signos distintos...
-        autovalor *= (-1);                                                                  //el autovalor es negativo.
+    if(autovector[i] * autovector_temp[i] < 0) {   //Si tienen signos distintos...
+        autovalor *= (-1);                         //el autovalor es negativo.
+        autovector = mult_matr_por_vect(M, autovector);   //Autovector está en el mismo sentido que autovector_temp.
+    }
     //Cálculo del autovector:
-    diferencia = 1;
+    diferencia = norma1(restaVec(autovector,autovector_temp));
     while(diferencia >= 0.001){
         autovector_temp = mult_matr_por_vect(M, autovector);
+        normalizar1(autovector_temp);
         autovector = mult_matr_por_vect(M, autovector_temp);
         if(autovalor < 0)       //Si el autovalor es negativo los vectores están en sentidos opuestos.
             autovector = mult_matr_por_vect(M, autovector);    //Ahora están en el mismo sentido.
         normalizar1(autovector);
-        normalizar1(autovector_temp);
         diferencia = norma1(restaVec(autovector,autovector_temp));
     }
     normalizar2(autovector);
-	return res;
+    //algoritmo 2:
+    pair<double,vector<double> > res2;
+    double& autovalor2 = res2.first;
+    double autovalor2_temp;
+    vector<double>& autovector2 = res2.second;
+    autovector2 = vector<double>(n,0);
+    autovector2[0] = 1;   //Empieza siendo e1.
+    vector<double> autovector2_temp;
+    //Cálculo del autovalor:
+    double diferencia2 = 1;
+    float cantidad_iteraciones2 = 0;
+    auto t3 = chrono::system_clock::now();
+    while(diferencia2 >= 0.000001){
+        autovector2_temp = mult_matr_por_vect(M, autovector2);
+        autovalor2_temp = producto_interno(autovector2, autovector2_temp); //autovector está normalizado.
+        normalizar2(autovector2_temp);
+        autovector2 = mult_matr_por_vect(M, autovector2_temp);
+        autovalor2 = producto_interno(autovector2_temp, autovector2); //autovector_temp está normalizado.
+        normalizar2(autovector2);
+        diferencia2 = abs(autovalor2-autovalor2_temp);
+        ++cantidad_iteraciones2;
+    }
+    auto t4 = chrono::system_clock::now();
+    if(autovalor2 < 0){
+        autovector2 = mult_matr_por_vect(M, autovector2);
+        normalizar2(autovector2);
+        diferencia2 = norma1(restaVec(autovector2, autovector2_temp));
+        while(diferencia2 > 0.001){
+            autovector2_temp = mult_matr_por_vect(M, autovector2);
+            normalizar2(autovector2_temp);
+            autovector2 = mult_matr_por_vect(M, autovector2_temp);
+            autovector2 = mult_matr_por_vect(M, autovector2);
+            normalizar2(autovector2_temp);
+            diferencia2 = norma1(restaVec(autovector2, autovector2_temp));
+        }
+    }else{
+        diferencia2 = norma1(restaVec(autovector2, autovector2_temp));
+        while(diferencia2 > 0.001){
+            autovector2_temp = mult_matr_por_vect(M, autovector2);
+            normalizar2(autovector2_temp);
+            autovector2 = mult_matr_por_vect(M, autovector2_temp);
+            normalizar2(autovector2_temp);
+            diferencia2 = norma1(restaVec(autovector2, autovector2_temp));
+        }
+    }
+    salida.open("Comparación_de_algoritmos.txt", ios::app);
+    salida << "Iteraciones: " << cantidad_iteraciones/cantidad_iteraciones2 << ";\t Ciclos de clock: " << double((t2-t1).count())/(t4-t3).count() << endl;
+    salida.close();
+    return res;
 }
 
 
@@ -301,13 +367,16 @@ vector<vector<double> > PCA (vector<vector<double> >* trainX, uint alpha) {
 
 int main(int argc, char * argv[]) {
     string metodo, trainSet, testSet, classif;
+    salida.open("Comparación_de_algoritmos.txt", ios_base::app);
+    salida << "Rendimiento relativo, algor.1/algor.2" << endl;
+    salida.close();
 
 /*    if (!obtenerParametros(argc, argv, &metodo, &trainSet, &testSet, &classif)) {
         cout << "Modo de uso: tp2 -m <method> -i <train_set> -q <test_set> -o <classif>\n";
     } else {*/
 		vector<vector<double>>* dataSet = new vector<vector<double> >;
 		vector<uint>* labelsX = new vector<uint > (41);
-		
+
 
 		cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
 		uint x = Knn(*dataSet,*labelsX,(*dataSet)[71],1);
