@@ -342,20 +342,17 @@ uint Knn (const vector<vector<double> >& trainX, const vector<uint>& labelsX, co
 double accuracy (const vector<vector<double> >& trainX, const vector<uint>& labelsX, const vector<vector<double> >& testY, const vector<uint>& labelsY, uint k) {
 	const unsigned long& n = labelsY.size(); //me di cuenta que si vamos a usar como label el numero de fila dentro de la matriz entonces el labelsY de mucho no nos sirve pero bueno
 	double acum = 0;
-	double res;
 	for (uint i = 0; i < n; i++) {
 		if (Knn(trainX,labelsX,testY[i],k) == labelsY[i]){
 			acum++;
 		}
 	}
-	res = acum/n;
-	return res;
+	return acum/n;
 }	
 
-double precision(vector<vector<double> > trainX, vector<uint> labelsX, vector<vector<double> > testY, vector<uint> labelsY, uint clase, uint k) {
-	uint n = labelsY.size();
+double precision(const vector<vector<double> >& trainX, const vector<uint>& labelsX, const vector<vector<double> >& testY, const vector<uint>& labelsY, uint clase, uint k) {
+    const unsigned long& n = labelsY.size();
 	double truepositives = 0, positives = 0;
-	double res;
 	for (uint i = 0; i < n; i++) {
 		uint Knnres = Knn(trainX,labelsX,testY[i],k);
 		if (Knnres == clase){ //si el Knn dio igual a la clase que estoy procesando entonces sumo 1 a los elementos recuperados
@@ -365,12 +362,11 @@ double precision(vector<vector<double> > trainX, vector<uint> labelsX, vector<ve
 			}
 		}
 	}
-	res = truepositives/positives;
-	return res;
+	return truepositives/positives;
 }
 
-double recall(vector<vector<double> > trainX, vector<uint> labelsX, vector<vector<double> > testY, vector<uint> labelsY, uint clase, uint k) {
-	uint n = labelsY.size();
+double recall(const vector<vector<double> >& trainX, const vector<uint>& labelsX, const vector<vector<double> >& testY, const vector<uint>& labelsY, uint clase, uint k) {
+    const unsigned long& n = labelsY.size();
 	double truepositives = 0, relevants = 0;
 	double res;
 	for (uint i = 0; i < n; i++) {
@@ -385,22 +381,15 @@ double recall(vector<vector<double> > trainX, vector<uint> labelsX, vector<vecto
 	return res;
 }
 
-vector<vector<double> > multMat( vector<vector<double> > mat1, vector<vector<double> > mat2) {
-	vector<vector<double> > res (0);
-	uint n = mat1.size();
-	uint m = mat2[0].size();
-	for (uint i = 0; i < mat1.size(); i++){
-		vector<double> temp (n);
-		for (uint j = 0; j < m; j++){
-			double acum = 0;
-			for (uint k = 0; k < n; k++){
-				acum+= mat1[i][k]+mat2[k][j];
-			}
-			temp[j] = acum;
-		}
-		res.push_back(temp);	
-
-	}
+vector<vector<double> > multMat(const vector<vector<double> >& mat1, const vector<vector<double> >& mat2) {
+    const unsigned long& n = mat1.size();
+    const unsigned long& m = mat2[0].size();
+    const unsigned long& l = mat2.size();
+	vector<vector<double> > res (n, vector<double>(m, 0));
+	for (uint i = 0; i < n; i++)
+		for (uint j = 0; j < m; j++)
+			for (uint k = 0; k < l; k++)
+				res[i][j] += mat1[i][k]*mat2[k][j];
 	return res;
 }
 
