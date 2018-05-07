@@ -414,7 +414,7 @@ vector<vector<double> > PCA (vector<vector<double> > trainX, uint alpha) {
 	}
 	return V; //devuelvo la V, recordar multiplicar fuera de la funcion
 }
-vector<pair<vector<pair<double,double > >,double> > kFold (vector<vector<double> > trainX, vector<uint> labelsX, uint k, uint kdeKnn, uint alpha) {
+vector<pair<vector<resultados >,double> > kFold (vector<vector<double> > trainX, vector<uint> labelsX, uint k, uint kdeKnn, uint alpha) {
 	uint imagenesPorPersona = 10; //esto podria variar si cambiamos el trainX
 	int imagenesPPparagenerador = 10; //es el mismo numero de arriba pero lo uso para generar numeros aleatorios
 	uint cantidadDeClases = 41; // idem arriba
@@ -455,7 +455,7 @@ vector<pair<vector<pair<double,double > >,double> > kFold (vector<vector<double>
 			resultados resXClase;
 			resXClase.precision = precision(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,j,kdeKnn);
 			resXClase.recall = recall(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,j,kdeKnn);
-			resXClase.f1 = 2.0*resXClase.precision*resXClase.recall/(resXClase.precision+resXClase.recall)
+			resXClase.f1 = 2.0*resXClase.precision*resXClase.recall/(resXClase.precision+resXClase.recall);
 			resXClase.clase = j;
 			resultadosTemp.push_back(resXClase);
 		}//entonces en el vector la posicion 0 corresponde a la clase 1 y asi sucesivamente
@@ -479,7 +479,7 @@ int main(int argc, char * argv[]) {
 
 		cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
 		
-		vector<pair<vector<pair<double,double > >,double> > dasdsa = kFold(*dataSet,*labelsX,5,2,6);
+		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSet,*labelsX,5,2,6);
 
 
 		delete labelsX;
