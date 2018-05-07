@@ -13,6 +13,14 @@
 
 using namespace std;
 
+typedef struct {
+	uint clase;
+	double precision;
+	double recall;
+	double f1;
+} resultados;
+
+
 vector<double> calcularMedias(const vector<vector<double> >& imgs) {
     const unsigned long& m = imgs[0].size();
 	vector<double> res (m) ;
@@ -419,7 +427,7 @@ vector<pair<vector<pair<double,double > >,double> > kFold (vector<vector<double>
 	} // la idea es que voy a tener muestras balanceadas, entonces para cada persona voy a tener la misma cantidad de imagenes en test y en train
 		// como cada persona tiene 10 imagenes, el k puede ser 1, 2, 5 o 10, k = 1 no tiene mucho sentido
 	uint n = trainX.size()/imagenesPorPersona; //n es la cantidad de personas
-	vector<pair<vector<pair<double,double > >,double> > res;
+	vector<pair<vector<resultados >,double> > res;
 	for(uint i = 0; i<k; i++){ //itero sobre la cantidad de folds
 		vector<vector<double> > trainXTemp;
 		vector<vector<double> > testYTemp;
@@ -442,15 +450,17 @@ vector<pair<vector<pair<double,double > >,double> > kFold (vector<vector<double>
 		/*vector<vector<double>> V = PCA(trainXTemp,6);
 		trainXTemp = multMat(trainXTemp,V);
 		testYTemp = multMat(testYTemp,V);*/
-		vector<pair<double,double > > precYRecallTemp;
+		vector<resultados > resultadosTemp;
 		for (uint j = 1; j < cantidadDeClases; j++){ //itero sobre las clases
-			double precisionTemp = precision(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,j,kdeKnn);
-			double recallTemp = recall(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,j,kdeKnn);
-			pair<double,double > pairTemp = make_pair(precisionTemp,recallTemp);
-			precYRecallTemp.push_back(pairTemp);
+			resultados resXClase;
+			resXClase.precision = precision(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,j,kdeKnn);
+			resXClase.recall = recall(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,j,kdeKnn);
+			resXClase.f1 = 2.0*resXClase.precision*resXClase.recall/(resXClase.precision+resXClase.recall)
+			resXClase.clase = j;
+			resultadosTemp.push_back(resXClase);
 		}//entonces en el vector la posicion 0 corresponde a la clase 1 y asi sucesivamente
 		double accuracyTemp = accuracy(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,kdeKnn);
-		res.push_back(make_pair(precYRecallTemp,accuracyTemp));
+		res.push_back(make_pair(resultadosTemp,accuracyTemp));
 	}
 	return res;	
 }
