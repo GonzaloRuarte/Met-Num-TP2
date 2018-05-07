@@ -53,21 +53,22 @@ vector<vector<double> > calcularMx (const vector<vector<double> >& imgs) {
     const size_t& n = imgs.size();
     const size_t& m = imgs[0].size();
 	vector<vector<double> > res(m, vector<double>(m));
-	/*double covar_ij;
+	double covar_ij;
+	double& var_i = covar_ij;
 	for (uint i = 0; i < m; i++){
-        	covar_ij = 0;
-        	for (uint k = 0; k < n; k++)
-		covar_ij += imgs[k][i]*imgs[k][i]; //calculo de la sumatoria de productos para calcular varianza
-        	res[i][i] = covar_ij/(n-1);
+	    var_i = 0;
+	    for (uint k = 0; k < n; k++)
+		    var_i += imgs[k][i]*imgs[k][i]; //calculo de la sumatoria de productos para calcular varianza
+        res[i][i] = var_i/(n-1);
 		for (uint j = i+1; j < m; j++){ //como la matriz es simetrica basta calcular la mitad superior.
-            		covar_ij = 0;
+            covar_ij = 0;
 			for (uint k = 0; k < imgs.size(); k++)
-                		covar_ij += imgs[k][i]*imgs[k][j]; //calculo de la sumatoria de productos para calcular covarianza
-				res[i][j] = covar_ij/(n-1);
-				res[j][i] = covar_ij/(n-1);
+			    covar_ij += imgs[k][i]*imgs[k][j]; //calculo de la sumatoria de productos para calcular covarianza
+			res[i][j] = covar_ij/(n-1);
+			res[j][i] = covar_ij/(n-1);
 		}
-	}*/
-	double acum;
+	}
+/*	double acum;
 	for (uint i = 0; i < m; i++){
 		for (uint j = i; j < m; j++){
 			acum = 0;
@@ -77,7 +78,7 @@ vector<vector<double> > calcularMx (const vector<vector<double> >& imgs) {
 			res[i][j] = acum/(n-1);
 			res[j][i] = acum/(n-1);
 		}
-	}
+	}*/
 	return res;
 }
 
@@ -149,11 +150,11 @@ vector<double> restaVec(const vector<double> &vec1, const vector<double> &vec2) 
     return res;
 }
 
-ofstream salida("Comparación_de_algoritmos.txt", ios_base::out);
+//ofstream salida("Comparación_de_algoritmos.txt", ios_base::out);
 pair<double,vector<double> > metodoPotencia(const vector<vector<double> > &M) {
     const size_t& n = M[0].size();
     //algoritmo 1:
-    pair<double,vector<double> > res;
+/*    pair<double,vector<double> > res;
 	double& autovalor = res.first;
     double autovalor_temp;
     vector<double>& autovector = res.second;
@@ -191,7 +192,7 @@ pair<double,vector<double> > metodoPotencia(const vector<vector<double> > &M) {
         normalizar1(autovector);
         diferencia = norma1(restaVec(autovector,autovector_temp));
     }
-    normalizar2(autovector);
+    normalizar2(autovector);*/
     //algoritmo 2:
     pair<double,vector<double> > res2;
     double& autovalor2 = res2.first;
@@ -237,10 +238,10 @@ pair<double,vector<double> > metodoPotencia(const vector<vector<double> > &M) {
             diferencia2 = norma1(restaVec(autovector2, autovector2_temp));
         }
     }
-    salida.open("Comparación_de_algoritmos.txt", ios::app);
+/*    salida.open("Comparación_de_algoritmos.txt", ios::app);
     salida << "Iteraciones: " << cantidad_iteraciones/cantidad_iteraciones2 << ";\t Ciclos de clock: " << double((t2-t1).count())/(t4-t3).count() << endl;
-    salida.close();
-    return res;
+    salida.close();*/
+    return res2;
 }
 
 
@@ -267,7 +268,7 @@ void sumMat(vector<vector<double> > &mat1, const vector<vector<double> > &mat2) 
 }
 
 vector< pair<double,vector<double> > > deflacion(vector<vector<double> > mat, uint alpha) {
-	vector< pair<double,vector<double> > > res (mat.size());
+	vector< pair<double,vector<double> > > res (alpha);
     for (uint i = 0; i < alpha; i++){
         res[i] = metodoPotencia(mat);
         vector<vector<double> > v_x_vt = multVec(res[i].second);    //v*vt
@@ -287,7 +288,7 @@ vector<vector<double> > generarP(const vector<vector<double> > &mat, uint alpha)
 }
 
 
-uint Knn (vector<vector<double> > trainX, vector<uint> labelsX, vector<double> newImg, uint k) {//las labels podrian no ser un uint pero lo dejo asi en un principio
+uint Knn (const vector<vector<double> >& trainX, const vector<uint>& labelsX, const vector<double>& newImg, uint k) {//las labels podrian no ser un uint pero lo dejo asi en un principio
 	vector<pair<double,uint> > vecNormas (trainX.size());
 	vector<pair<double,uint> > sorted (k);
 	double temp;
@@ -296,7 +297,7 @@ uint Knn (vector<vector<double> > trainX, vector<uint> labelsX, vector<double> n
 		vecNormas[i].first = temp;
 		vecNormas[i].second = labelsX[i];
 	}
-    /*vector<pair<double,uint> >::const_iterator primero = vecNormas.cbegin();
+    vector<pair<double,uint> >::const_iterator primero = vecNormas.cbegin();
     vector<pair<double,uint> >::const_iterator k_esimo = primero+k;
 	priority_queue<pair<double,uint> > heap(primero, k_esimo);  //Creo un max_heap con los primeros k elementos de vecNormas
 	for(size_t i = k; i < vecNormas.size(); ++i){
@@ -308,8 +309,8 @@ uint Knn (vector<vector<double> > trainX, vector<uint> labelsX, vector<double> n
 	for(int i = k-1; i >= 0; --i){
 	    sorted[i] = heap.top();
 	    heap.pop();
-	}*/
-	for(uint i = 0; i < k; i++) {//sort de menor a mayor segun las normas
+	}
+/*	for(uint i = 0; i < k; i++) {//sort de menor a mayor segun las normas
 		double min = 255*255*92*112;
 		uint temp;
 		for(uint j = 0; j < vecNormas.size(); j++) {
@@ -320,7 +321,7 @@ uint Knn (vector<vector<double> > trainX, vector<uint> labelsX, vector<double> n
 		}
 		sorted.push_back(vecNormas[temp]);
 		vecNormas.erase(vecNormas.begin()+temp);
-	}
+	}*/
 	pair<uint,int> masRepetido;
 	masRepetido.second = 0;
 	for (uint i = 0; i < labelsX.size(); i++) {//calculo del mas repetido de los k vecinos mas cercanos
@@ -338,8 +339,8 @@ uint Knn (vector<vector<double> > trainX, vector<uint> labelsX, vector<double> n
 	return masRepetido.first;
 }
 
-double accuracy (vector<vector<double> > trainX, vector<uint> labelsX, vector<vector<double> > testY, vector<uint> labelsY, uint k) {
-	uint n = labelsY.size(); //me di cuenta que si vamos a usar como label el numero de fila dentro de la matriz entonces el labelsY de mucho no nos sirve pero bueno
+double accuracy (const vector<vector<double> >& trainX, const vector<uint>& labelsX, const vector<vector<double> >& testY, const vector<uint>& labelsY, uint k) {
+	const unsigned long& n = labelsY.size(); //me di cuenta que si vamos a usar como label el numero de fila dentro de la matriz entonces el labelsY de mucho no nos sirve pero bueno
 	double acum = 0;
 	double res;
 	for (uint i = 0; i < n; i++) {
@@ -465,9 +466,9 @@ vector<pair<vector<resultados >,double> > kFold (vector<vector<double> > trainX,
 }
 int main(int argc, char * argv[]) {
     string metodo, trainSet, testSet, classif;
-    salida.open("Comparación_de_algoritmos.txt", ios_base::app);
+/*    salida.open("Comparación_de_algoritmos.txt", ios_base::app);
     salida << "Rendimiento relativo, algor.1/algor.2" << endl;
-    salida.close();
+    salida.close();*/
 
 /*    if (!obtenerParametros(argc, argv, &metodo, &trainSet, &testSet, &classif)) {
         cout << "Modo de uso: tp2 -m <method> -i <train_set> -q <test_set> -o <classif>\n";
