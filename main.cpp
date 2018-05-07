@@ -298,7 +298,7 @@ uint Knn (vector<vector<double> > trainX, vector<uint> labelsX, vector<double> n
             heap.push(vecNormas[i]);    //y meto al i-ésimo elemento.
         }                               //De esta forma me quedo con los k elementos más chicos.
 	}
-	for(uint i = k-1; i >= 0; --i){
+	for(int i = k-1; i >= 0; --i){
 	    sorted[i] = heap.top();
 	    heap.pop();
 	}
