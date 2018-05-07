@@ -53,23 +53,22 @@ vector<vector<double> > calcularMx (const vector<vector<double> >& imgs) {
     const size_t& n = imgs.size();
     const size_t& m = imgs[0].size();
 	vector<vector<double> > res(m, vector<double>(m));
-	double covar_ij;
+	/*double covar_ij;
 	for (uint i = 0; i < m; i++){
-        covar_ij = 0;
-        for (uint k = 0; k < n; k++)
-            covar_ij += imgs[k][i]*imgs[k][i]; //calculo de la sumatoria de productos para calcular varianza
-        res[i][i] = covar_ij/(n-1);
+        	covar_ij = 0;
+        	for (uint k = 0; k < n; k++)
+		covar_ij += imgs[k][i]*imgs[k][i]; //calculo de la sumatoria de productos para calcular varianza
+        	res[i][i] = covar_ij/(n-1);
 		for (uint j = i+1; j < m; j++){ //como la matriz es simetrica basta calcular la mitad superior.
-            covar_ij = 0;
+            		covar_ij = 0;
 			for (uint k = 0; k < imgs.size(); k++)
-                covar_ij += imgs[k][i]*imgs[k][j]; //calculo de la sumatoria de productos para calcular covarianza
-			res[i][j] = covar_ij/(n-1);
-			res[j][i] = covar_ij/(n-1);
+                		covar_ij += imgs[k][i]*imgs[k][j]; //calculo de la sumatoria de productos para calcular covarianza
+				res[i][j] = covar_ij/(n-1);
+				res[j][i] = covar_ij/(n-1);
 		}
-	}
-/*	double acum;
+	}*/
+	double acum;
 	for (uint i = 0; i < m; i++){
-		vector<double> temp (m);
 		for (uint j = i; j < m; j++){
 			acum = 0;
 			for (uint k = 0; k < n; k++){
@@ -78,7 +77,7 @@ vector<vector<double> > calcularMx (const vector<vector<double> >& imgs) {
 			res[i][j] = acum/(n-1);
 			res[j][i] = acum/(n-1);
 		}
-	}*/
+	}
 	return res;
 }
 
@@ -297,7 +296,7 @@ uint Knn (vector<vector<double> > trainX, vector<uint> labelsX, vector<double> n
 		vecNormas[i].first = temp;
 		vecNormas[i].second = labelsX[i];
 	}
-    vector<pair<double,uint> >::const_iterator primero = vecNormas.cbegin();
+    /*vector<pair<double,uint> >::const_iterator primero = vecNormas.cbegin();
     vector<pair<double,uint> >::const_iterator k_esimo = primero+k;
 	priority_queue<pair<double,uint> > heap(primero, k_esimo);  //Creo un max_heap con los primeros k elementos de vecNormas
 	for(size_t i = k; i < vecNormas.size(); ++i){
@@ -309,8 +308,8 @@ uint Knn (vector<vector<double> > trainX, vector<uint> labelsX, vector<double> n
 	for(uint i = k-1; i >= 0; --i){
 	    sorted[i] = heap.top();
 	    heap.pop();
-	}
-/*	for(uint i = 0; i < k; i++) {//sort de menor a mayor segun las normas
+	}*/
+	for(uint i = 0; i < k; i++) {//sort de menor a mayor segun las normas
 		double min = 255*255*92*112;
 		uint temp;
 		for(uint j = 0; j < vecNormas.size(); j++) {
@@ -321,7 +320,7 @@ uint Knn (vector<vector<double> > trainX, vector<uint> labelsX, vector<double> n
 		}
 		sorted.push_back(vecNormas[temp]);
 		vecNormas.erase(vecNormas.begin()+temp);
-	}*/
+	}
 	pair<uint,int> masRepetido;
 	masRepetido.second = 0;
 	for (uint i = 0; i < labelsX.size(); i++) {//calculo del mas repetido de los k vecinos mas cercanos
@@ -409,9 +408,9 @@ vector<vector<double> > PCA (vector<vector<double> > trainX, uint alpha) {
 	vector<vector<double> > Mx = calcularMx(trainX);
 	vector<vector<double> > V = trasponer(generarP(Mx,alpha));
     convertirMatrizAImagen("./salidaVtraspuesta", 10, &V);
-	for (uint i = 0; i < m; i++){
+	/*for (uint i = 0; i < m; i++){ //esto no hace falta por ahora porque la V se calcula ya con alpha columnas
 		V[i].erase(V[i].begin()+alpha, V[i].end());
-	}
+	}*/
 	return V; //devuelvo la V, recordar multiplicar fuera de la funcion
 }
 vector<pair<vector<resultados >,double> > kFold (vector<vector<double> > trainX, vector<uint> labelsX, uint k, uint kdeKnn, uint alpha) {
@@ -447,9 +446,9 @@ vector<pair<vector<resultados >,double> > kFold (vector<vector<double> > trainX,
 			}
 		}
 		//tengo armado el train y el test para este fold
-		/*vector<vector<double>> V = PCA(trainXTemp,6);
+		vector<vector<double>> V = PCA(trainXTemp,6);
 		trainXTemp = multMat(trainXTemp,V);
-		testYTemp = multMat(testYTemp,V);*/
+		testYTemp = multMat(testYTemp,V);
 		vector<resultados > resultadosTemp;
 		for (uint j = 1; j < cantidadDeClases; j++){ //itero sobre las clases
 			resultados resXClase;
@@ -478,7 +477,7 @@ int main(int argc, char * argv[]) {
 
 
 		cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
-		
+
 		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSet,*labelsX,5,2,6);
 
 
