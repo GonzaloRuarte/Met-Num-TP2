@@ -133,11 +133,11 @@ void getEtiquetas(stringvec *listaImagenes, vector<uint>* etiquetas) {
 
 void cargarDataSetEnMatriz(string pathAlDataSet, vector<vector<double>>* dataSet, vector<uint>* labelsX) {
     stringvec listaImagenes;
-	stringvec listaDirectorios;
+	  stringvec listaDirectorios;
 
     listarDirectorio(pathAlDataSet, listaDirectorios);
 
-	listarImagenes(pathAlDataSet, listaImagenes);
+	  listarImagenes(pathAlDataSet, listaImagenes);
 
     //copy(listaImagenes.begin(), listaImagenes.end(), ostream_iterator<string>(cout, "\n"));
     getEtiquetas(&listaDirectorios, labelsX);
