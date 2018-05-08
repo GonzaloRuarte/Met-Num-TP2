@@ -52,20 +52,22 @@ vector<vector<double> > obtenerX(const vector<vector<double> >& imgs, const vect
 vector<vector<double> > calcularMx (const vector<vector<double> >& imgs) {
 	vector<double> medias = calcularMedias(imgs);
 	vector<vector<double> > X = obtenerX(imgs,medias);
-    const size_t& n = imgs.size();
-    const size_t& m = imgs[0].size();
+	const size_t& n = imgs.size();
+	const size_t& m = imgs[0].size();
 	vector<vector<double> > res(m, vector<double>(m));
 	double covar_ij;
 	double& var_i = covar_ij;
 	for (uint i = 0; i < m; i++){
-	    var_i = 0;
-	    for (uint k = 0; k < n; k++)
-		    var_i += X[k][i]*X[k][i]; //calculo de la sumatoria de productos para calcular varianza
-        res[i][i] = var_i/(n-1);
+		var_i = 0;
+		for (uint k = 0; k < n; k++){
+			var_i += X[k][i]*X[k][i]; //calculo de la sumatoria de productos para calcular varianza
+		}
+		res[i][i] = var_i/(n-1);
 		for (uint j = i+1; j < m; j++){ //como la matriz es simetrica basta calcular la mitad superior.
-            covar_ij = 0;
-			for (uint k = 0; k < n; k++)
-			    covar_ij += X[k][i]*X[k][j]; //calculo de la sumatoria de productos para calcular covarianza
+			covar_ij = 0;
+			for (uint k = 0; k < n; k++){
+				covar_ij += X[k][i]*X[k][j];//calculo de la sumatoria de productos para calcular covarianza
+			}	
 			res[i][j] = covar_ij/(n-1);
 			res[j][i] = covar_ij/(n-1);
 		}
@@ -83,6 +85,32 @@ vector<vector<double> > calcularMx (const vector<vector<double> >& imgs) {
 	}*/
 	return res;
 }
+
+vector<vector<double> > calcularMxTecho (const vector<vector<double> >& X) { //como traspongo X aca el m de aca es el n de la funcion de arriba y viceversa
+	const size_t& n = X.size();
+	const size_t& m = X[0].size();
+	vector<vector<double> > res(m, vector<double>(m));
+	double covar_ij;
+	double& var_i = covar_ij;
+	for (uint i = 0; i < m; i++){
+		var_i = 0;
+		for (uint k = 0; k < n; k++){
+			var_i += X[k][i]*X[k][i]; //calculo de la sumatoria de productos para calcular varianza
+		}
+		res[i][i] = var_i/(n-1);
+		for (uint j = i+1; j < m; j++){ //como la matriz es simetrica basta calcular la mitad superior.
+			covar_ij = 0;
+			for (uint k = 0; k < n; k++){
+				covar_ij += X[k][i]*X[k][j];//calculo de la sumatoria de productos para calcular covarianza
+			}	
+			res[i][j] = covar_ij/(m-1);
+			res[j][i] = covar_ij/(m-1);
+		}
+	}
+	return res;
+}
+
+
 
 vector<vector<double> > trasponer(const vector<vector<double> >& mat){
     const unsigned long& n = mat.size();
@@ -406,6 +434,7 @@ vector<vector<double> > multMat(const vector<vector<double> >& mat1, const vecto
 vector<vector<double> > PCA (vector<vector<double> > trainX, uint alpha) {
     const unsigned long& m = trainX[0].size();
 	vector<vector<double> > Mx = calcularMx(trainX);
+	vector<vector<double> > X = obtenerX(trainX,
 	vector<vector<double> > V = generarV(Mx,alpha);
     convertirMatrizAImagen("./salidaVtraspuesta", 10, &V);
 	/*for (uint i = 0; i < m; i++){ //esto no hace falta por ahora porque la V se calcula ya con alpha columnas
@@ -413,6 +442,27 @@ vector<vector<double> > PCA (vector<vector<double> > trainX, uint alpha) {
 	}*/
 	return V; //devuelvo la V, recordar multiplicar fuera de la funcion
 }
+
+vector<vector<double> > PCATecho (vector<vector<double> > trainX, uint alpha) {
+    const unsigned long& m = trainX[0].size();
+	vector<double> medias = calcularMedias(trainX);
+	vector<vector<double> > Xt = trasponer(obtenerX(imgs,medias));
+	vector<vector<double> > Mx = calcularMxTecho(Xt);
+	vector<vector<double> > P = generarV(Mx,alpha);
+	vector<vector<double> > V = multmat(Xt,P);
+	V = trasponer(V);
+	for (uint i = 0; i< V.size(); i++){
+		normalizar2(V[i]);
+	}
+	V = trasponer(V);
+    convertirMatrizAImagen("./salidaVtraspuesta", 10, &P);
+	/*for (uint i = 0; i < m; i++){ //esto no hace falta por ahora porque la V se calcula ya con alpha columnas
+		V[i].erase(V[i].begin()+alpha, V[i].end());
+	}*/
+	return V; //devuelvo la V, recordar multiplicar fuera de la funcion
+}
+
+
 vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, uint k, uint kdeKnn, uint alpha) {
 	uint imagenesPorPersona = 10; //esto podria variar si cambiamos el trainX
 	int imagenesPPparagenerador = 10; //es el mismo numero de arriba pero lo uso para generar numeros aleatorios
