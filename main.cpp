@@ -58,12 +58,12 @@ vector<vector<double> > calcularMx (const vector<vector<double> >& imgs) {
 	for (uint i = 0; i < m; i++){
 	    var_i = 0;
 	    for (uint k = 0; k < n; k++)
-		    var_i += imgs[k][i]*imgs[k][i]; //calculo de la sumatoria de productos para calcular varianza
+		    var_i += X[k][i]*X[k][i]; //calculo de la sumatoria de productos para calcular varianza
         res[i][i] = var_i/(n-1);
 		for (uint j = i+1; j < m; j++){ //como la matriz es simetrica basta calcular la mitad superior.
             covar_ij = 0;
-			for (uint k = 0; k < imgs.size(); k++)
-			    covar_ij += imgs[k][i]*imgs[k][j]; //calculo de la sumatoria de productos para calcular covarianza
+			for (uint k = 0; k < n; k++)
+			    covar_ij += X[k][i]*X[k][j]; //calculo de la sumatoria de productos para calcular covarianza
 			res[i][j] = covar_ij/(n-1);
 			res[j][i] = covar_ij/(n-1);
 		}
@@ -368,7 +368,6 @@ double precision(const vector<vector<double> >& trainX, const vector<uint>& labe
 double recall(const vector<vector<double> >& trainX, const vector<uint>& labelsX, const vector<vector<double> >& testY, const vector<uint>& labelsY, uint clase, uint k) {
     const unsigned long& n = labelsY.size();
 	double truepositives = 0, relevants = 0;
-	double res;
 	for (uint i = 0; i < n; i++) {
 		if (labelsY[i] == clase){//si el elemento que estoy analizando pertenece a la clase que estoy procesando, sumo 1 a los relevantes
 		 	relevants++;
@@ -377,8 +376,7 @@ double recall(const vector<vector<double> >& trainX, const vector<uint>& labelsX
 			}
 		}
 	}
-	res = truepositives/relevants;
-	return res;
+	return truepositives/relevants;
 }
 
 vector<vector<double> > multMat(const vector<vector<double> >& mat1, const vector<vector<double> >& mat2) {
@@ -394,7 +392,7 @@ vector<vector<double> > multMat(const vector<vector<double> >& mat1, const vecto
 }
 
 vector<vector<double> > PCA (vector<vector<double> > trainX, uint alpha) {
-	uint m = trainX[0].size();
+    const unsigned long& m = trainX[0].size();
 	vector<vector<double> > Mx = calcularMx(trainX);
 	vector<vector<double> > V = trasponer(generarP(Mx,alpha));
     convertirMatrizAImagen("./salidaVtraspuesta", 10, &V);
