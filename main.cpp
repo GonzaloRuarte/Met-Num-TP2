@@ -434,7 +434,6 @@ vector<vector<double> > multMat(const vector<vector<double> >& mat1, const vecto
 vector<vector<double> > PCA (vector<vector<double> > trainX, uint alpha) {
     const unsigned long& m = trainX[0].size();
 	vector<vector<double> > Mx = calcularMx(trainX);
-	vector<vector<double> > X = obtenerX(trainX,
 	vector<vector<double> > V = generarV(Mx,alpha);
     convertirMatrizAImagen("./salidaVtraspuesta", 10, &V);
 	/*for (uint i = 0; i < m; i++){ //esto no hace falta por ahora porque la V se calcula ya con alpha columnas
@@ -446,10 +445,10 @@ vector<vector<double> > PCA (vector<vector<double> > trainX, uint alpha) {
 vector<vector<double> > PCATecho (vector<vector<double> > trainX, uint alpha) {
     const unsigned long& m = trainX[0].size();
 	vector<double> medias = calcularMedias(trainX);
-	vector<vector<double> > Xt = trasponer(obtenerX(imgs,medias));
+	vector<vector<double> > Xt = trasponer(obtenerX(trainX,medias));
 	vector<vector<double> > Mx = calcularMxTecho(Xt);
 	vector<vector<double> > P = generarV(Mx,alpha);
-	vector<vector<double> > V = multmat(Xt,P);
+	vector<vector<double> > V = multMat(Xt,P);
 	V = trasponer(V);
 	for (uint i = 0; i< V.size(); i++){
 		normalizar2(V[i]);
