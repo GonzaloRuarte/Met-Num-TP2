@@ -435,7 +435,33 @@ vector<vector<double> > PCA (vector<vector<double> > trainX, uint alpha) {
     const unsigned long& m = trainX[0].size();
 	vector<vector<double> > Mx = calcularMx(trainX);
 	vector<vector<double> > V = generarV(Mx,alpha);
-    convertirMatrizAImagen("./salidaVtraspuesta", 10, &V);
+	/*vector<vector<double> > H = trasponer(V); //codigo para verificar las componentes principales
+	for (uint i = 0; i < H.size(); i++){
+		for (uint j = 0; j < H[0].size(); j++){
+			if (H[i][j] < 0){
+				H[i][j] = -H[i][j];
+			}
+		}
+		double min = H[i][0];
+		for (uint j = 0; j < H[0].size(); j++){
+			if (H[i][j] < min){
+				min = H[i][j];
+			}
+		}
+		for (uint j = 0; j < H[0].size(); j++){
+			H[i][j] += min;
+		}
+		double max = H[i][0];
+		for (uint j = 0; j < H[0].size(); j++){
+			if (H[i][j] > max){
+				max = H[i][j];
+			}
+		}
+		for (uint j = 0; j < H[0].size(); j++){
+			H[i][j] *= 255/max;
+		}
+	}
+	convertirMatrizAImagen("./salidaVtraspuesta", alpha, &H);*/
 	/*for (uint i = 0; i < m; i++){ //esto no hace falta por ahora porque la V se calcula ya con alpha columnas
 		V[i].erase(V[i].begin()+alpha, V[i].end());
 	}*/
@@ -450,11 +476,37 @@ vector<vector<double> > PCATecho (vector<vector<double> > trainX, uint alpha) {
 	vector<vector<double> > P = generarV(Mx,alpha);
 	vector<vector<double> > V = multMat(Xt,P);
 	V = trasponer(V);
-	for (uint i = 0; i< V.size(); i++){
+	for (uint i = 0; i < V.size(); i++){
 		normalizar2(V[i]);
 	}
 	V = trasponer(V);
-    convertirMatrizAImagen("./salidaVtraspuesta", 10, &P);
+ 	vector<vector<double> > H = trasponer(V); //codigo para verificar las componentes principales
+	for (uint i = 0; i < H.size(); i++){
+		for (uint j = 0; j < H[0].size(); j++){
+			if (H[i][j] < 0){
+				H[i][j] = -H[i][j];
+			}
+		}
+		double min = H[i][0];
+		for (uint j = 0; j < H[0].size(); j++){
+			if (H[i][j] < min){
+				min = H[i][j];
+			}
+		}
+		for (uint j = 0; j < H[0].size(); j++){
+			H[i][j] += min;
+		}
+		double max = H[i][0];
+		for (uint j = 0; j < H[0].size(); j++){
+			if (H[i][j] > max){
+				max = H[i][j];
+			}
+		}
+		for (uint j = 0; j < H[0].size(); j++){
+			H[i][j] *= 255/max;
+		}
+	}
+    	convertirMatrizAImagen("./salidaVtraspuesta", alpha, &H);
 	/*for (uint i = 0; i < m; i++){ //esto no hace falta por ahora porque la V se calcula ya con alpha columnas
 		V[i].erase(V[i].begin()+alpha, V[i].end());
 	}*/
@@ -495,7 +547,7 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 			}
 		}
 		//tengo armado el train y el test para este fold
-		vector<vector<double>> V = PCA(trainXTemp,6);
+		vector<vector<double>> V = PCATecho(trainXTemp,6);
 		trainXTemp = multMat(trainXTemp,V);
 		testYTemp = multMat(testYTemp,V);
 		vector<resultados > resultadosTemp;
@@ -526,7 +578,6 @@ int main(int argc, char * argv[]) {
 
 
 		cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
-
 		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSet,*labelsX,5,10,41);
 
 
