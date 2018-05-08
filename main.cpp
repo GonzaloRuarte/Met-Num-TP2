@@ -13,8 +13,10 @@
 
 using namespace std;
 
+typedef uint clase_t;
+
 typedef struct {
-	uint clase;
+	clase_t clase;
 	double precision;
 	double recall;
 	double f1;
@@ -204,7 +206,7 @@ pair<double,vector<double> > metodoPotencia(const vector<vector<double> > &M) {
     //Cálculo del autovalor:
     double diferencia2 = 1;
     float cantidad_iteraciones2 = 0;
-    auto t3 = chrono::system_clock::now();
+    //auto t3 = chrono::system_clock::now();
     while(diferencia2 >= 0.000001){
         autovector2_temp = mult_matr_por_vect(M, autovector2);
         autovalor2_temp = producto_interno(autovector2, autovector2_temp); //autovector está normalizado.
@@ -215,7 +217,7 @@ pair<double,vector<double> > metodoPotencia(const vector<vector<double> > &M) {
         diferencia2 = abs(autovalor2-autovalor2_temp);
         ++cantidad_iteraciones2;
     }
-    auto t4 = chrono::system_clock::now();
+    //auto t4 = chrono::system_clock::now();
     if(autovalor2 < 0){
         autovector2 = mult_matr_por_vect(M, autovector2);
         normalizar2(autovector2);
@@ -278,41 +280,39 @@ vector< pair<double,vector<double> > > deflacion(vector<vector<double> > mat, ui
 	return res;
 }
 
-vector<vector<double> > generarP(const vector<vector<double> > &mat, uint alpha){
-	vector<vector<double> > res (alpha);
+vector<vector<double> > generarV(const vector<vector<double> > &mat, uint alpha){
+	vector<vector<double> > res(mat[0].size(), vector<double>(alpha));
 	vector< pair<double,vector<double> > > autovectores = deflacion(mat,alpha);
-	for (uint i = 0; i< alpha; i++){
-		res[i] = autovectores[i].second;
-	}
+	for (uint j = 0; j < alpha; ++j)
+	    for(uint i = 0; i < mat[0].size(); ++i)
+		    res[i][j] = autovectores[j].second[i];
 	return res;
 }
 
 
-uint Knn (const vector<vector<double> >& trainX, const vector<uint>& labelsX, const vector<double>& newImg, uint k) {//las labels podrian no ser un uint pero lo dejo asi en un principio
-	vector<pair<double,uint> > vecNormas (trainX.size());
-	vector<pair<double,uint> > sorted (k);
-	double temp;
+clase_t Knn (const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, const vector<double>& newImg, uint k) {//las labels podrian no ser un uint pero lo dejo asi en un principio
+	vector<pair<double,clase_t> > vecNormas (trainX.size());
 	for (uint i = 0; i < labelsX.size(); i++) {
-		temp = norma2(restaVec(trainX[i],newImg));
-		vecNormas[i].first = temp;
+        vecNormas[i].first  = norma2(restaVec(trainX[i],newImg));
 		vecNormas[i].second = labelsX[i];
 	}
-    vector<pair<double,uint> >::const_iterator primero = vecNormas.cbegin();
-    vector<pair<double,uint> >::const_iterator k_esimo = primero+k;
-	priority_queue<pair<double,uint> > heap(primero, k_esimo);  //Creo un max_heap con los primeros k elementos de vecNormas
+    vector<pair<double,clase_t> >::const_iterator primero = vecNormas.cbegin();
+    vector<pair<double,clase_t> >::const_iterator k_esimo = primero+k;
+	priority_queue<pair<double,clase_t> > heap(primero, k_esimo);  //Creo un max_heap con los primeros k elementos de vecNormas
 	for(size_t i = k; i < vecNormas.size(); ++i){
         if(vecNormas[i] < heap.top()){  //Si el i-ésimo elemento es más chico que el más grande del heap...
             heap.pop();                 //entonces saco al más grande...
             heap.push(vecNormas[i]);    //y meto al i-ésimo elemento.
         }                               //De esta forma me quedo con los k elementos más chicos.
 	}
+    priority_queue<clase_t> posibles;
 	for(int i = k-1; i >= 0; --i){
-	    sorted[i] = heap.top();
+	    posibles.push(heap.top().second);
 	    heap.pop();
 	}
 /*	for(uint i = 0; i < k; i++) {//sort de menor a mayor segun las normas
 		double min = 255*255*92*112;
-		uint temp;
+		clase_t temp;
 		for(uint j = 0; j < vecNormas.size(); j++) {
 			if(vecNormas[j].first < min) {
 				min=vecNormas[j].first;
@@ -322,8 +322,20 @@ uint Knn (const vector<vector<double> >& trainX, const vector<uint>& labelsX, co
 		sorted.push_back(vecNormas[temp]);
 		vecNormas.erase(vecNormas.begin()+temp);
 	}*/
-	pair<uint,int> masRepetido;
+	pair<clase_t,uint> masRepetido;
 	masRepetido.second = 0;
+    pair<clase_t,uint> comparador;
+	while(!posibles.empty()){
+        comparador = make_pair(posibles.top(), 1);
+        posibles.pop();
+	    while(!posibles.empty() && comparador.first == posibles.top()) {
+            ++comparador.second;
+            posibles.pop();
+        }
+        if(comparador.second > masRepetido.second)
+            masRepetido = comparador;
+	}
+/*	vector<pair<double, clase_t> > sorted;
 	for (uint i = 0; i < labelsX.size(); i++) {//calculo del mas repetido de los k vecinos mas cercanos
 		int repetidoTemp = 0;
 		for (uint j = 0; j < k; j++) {
@@ -335,11 +347,11 @@ uint Knn (const vector<vector<double> >& trainX, const vector<uint>& labelsX, co
 			masRepetido.second = repetidoTemp;
 			masRepetido.first = i;
 		}
-	}
+	}*/
 	return masRepetido.first;
 }
 
-double accuracy (const vector<vector<double> >& trainX, const vector<uint>& labelsX, const vector<vector<double> >& testY, const vector<uint>& labelsY, uint k) {
+double accuracy (const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, const vector<vector<double> >& testY, const vector<clase_t>& labelsY, uint k) {
 	const unsigned long& n = labelsY.size(); //me di cuenta que si vamos a usar como label el numero de fila dentro de la matriz entonces el labelsY de mucho no nos sirve pero bueno
 	double acum = 0;
 	for (uint i = 0; i < n; i++) {
@@ -350,11 +362,11 @@ double accuracy (const vector<vector<double> >& trainX, const vector<uint>& labe
 	return acum/n;
 }	
 
-double precision(const vector<vector<double> >& trainX, const vector<uint>& labelsX, const vector<vector<double> >& testY, const vector<uint>& labelsY, uint clase, uint k) {
+double precision(const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, const vector<vector<double> >& testY, const vector<clase_t>& labelsY, clase_t clase, uint k) {
     const unsigned long& n = labelsY.size();
 	double truepositives = 0, positives = 0;
 	for (uint i = 0; i < n; i++) {
-		uint Knnres = Knn(trainX,labelsX,testY[i],k);
+		clase_t Knnres = Knn(trainX,labelsX,testY[i],k);
 		if (Knnres == clase){ //si el Knn dio igual a la clase que estoy procesando entonces sumo 1 a los elementos recuperados
 			positives++;
 			if (Knnres == labelsY[i]){ //si el Knn ademas dio bien el resultado sumo 1 a los true positives
@@ -365,7 +377,7 @@ double precision(const vector<vector<double> >& trainX, const vector<uint>& labe
 	return truepositives/positives;
 }
 
-double recall(const vector<vector<double> >& trainX, const vector<uint>& labelsX, const vector<vector<double> >& testY, const vector<uint>& labelsY, uint clase, uint k) {
+double recall(const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, const vector<vector<double> >& testY, const vector<clase_t>& labelsY, clase_t clase, uint k) {
     const unsigned long& n = labelsY.size();
 	double truepositives = 0, relevants = 0;
 	for (uint i = 0; i < n; i++) {
@@ -394,14 +406,14 @@ vector<vector<double> > multMat(const vector<vector<double> >& mat1, const vecto
 vector<vector<double> > PCA (vector<vector<double> > trainX, uint alpha) {
     const unsigned long& m = trainX[0].size();
 	vector<vector<double> > Mx = calcularMx(trainX);
-	vector<vector<double> > V = trasponer(generarP(Mx,alpha));
+	vector<vector<double> > V = generarV(Mx,alpha);
     convertirMatrizAImagen("./salidaVtraspuesta", 10, &V);
 	/*for (uint i = 0; i < m; i++){ //esto no hace falta por ahora porque la V se calcula ya con alpha columnas
 		V[i].erase(V[i].begin()+alpha, V[i].end());
 	}*/
 	return V; //devuelvo la V, recordar multiplicar fuera de la funcion
 }
-vector<pair<vector<resultados >,double> > kFold (vector<vector<double> > trainX, vector<uint> labelsX, uint k, uint kdeKnn, uint alpha) {
+vector<pair<vector<resultados >,double> > kFold (vector<vector<double> > trainX, vector<clase_t> labelsX, uint k, uint kdeKnn, uint alpha) {
 	uint imagenesPorPersona = 10; //esto podria variar si cambiamos el trainX
 	int imagenesPPparagenerador = 10; //es el mismo numero de arriba pero lo uso para generar numeros aleatorios
 	uint cantidadDeClases = 41; // idem arriba
@@ -466,7 +478,7 @@ int main(int argc, char * argv[]) {
 
 		cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
 
-		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSet,*labelsX,5,2,6);
+		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSet,*labelsX,5,10,41);
 
 
 		delete labelsX;
