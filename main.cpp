@@ -480,7 +480,7 @@ vector<vector<double> > PCATecho (vector<vector<double> > trainX, uint alpha) {
 		normalizar2(V[i]);
 	}
 	V = trasponer(V);
- 	vector<vector<double> > H = trasponer(V); //codigo para verificar las componentes principales
+ 	/*vector<vector<double> > H = trasponer(V); //codigo para verificar las componentes principales
 	for (uint i = 0; i < H.size(); i++){
 		for (uint j = 0; j < H[0].size(); j++){
 			if (H[i][j] < 0){
@@ -506,7 +506,7 @@ vector<vector<double> > PCATecho (vector<vector<double> > trainX, uint alpha) {
 			H[i][j] *= 255/max;
 		}
 	}
-    	convertirMatrizAImagen("./salidaVtraspuesta", alpha, &H);
+    	convertirMatrizAImagen("./salidaVtraspuesta", alpha, &H);*/
 	/*for (uint i = 0; i < m; i++){ //esto no hace falta por ahora porque la V se calcula ya con alpha columnas
 		V[i].erase(V[i].begin()+alpha, V[i].end());
 	}*/
