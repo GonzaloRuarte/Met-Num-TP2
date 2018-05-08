@@ -413,7 +413,7 @@ vector<vector<double> > PCA (vector<vector<double> > trainX, uint alpha) {
 	}*/
 	return V; //devuelvo la V, recordar multiplicar fuera de la funcion
 }
-vector<pair<vector<resultados >,double> > kFold (vector<vector<double> > trainX, vector<clase_t> labelsX, uint k, uint kdeKnn, uint alpha) {
+vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, uint k, uint kdeKnn, uint alpha) {
 	uint imagenesPorPersona = 10; //esto podria variar si cambiamos el trainX
 	int imagenesPPparagenerador = 10; //es el mismo numero de arriba pero lo uso para generar numeros aleatorios
 	uint cantidadDeClases = 41; // idem arriba
