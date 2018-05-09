@@ -1,5 +1,6 @@
 #include <string>
 #include <iostream>
+#include <fstream>
 #include "ppmloader.h"
 #include "dirent.h"
 #include <vector>
@@ -64,7 +65,7 @@ void cargarDataSet(stringvec listaImagenes, int tamanoDeReferencia, vector<vecto
         string nombreArchivo = *it;
         bool ret = LoadPPMFile(&datos, &ancho, &alto, &pt, nombreArchivo.c_str());
         if (!ret || ancho == 0|| alto == 0|| pt!=PPM_LOADER_PIXEL_TYPE_GRAY_8B) {
-            throw runtime_error("no se puede cargar el archivo" + nombreArchivo + "!");
+            throw runtime_error("no se puede cargar el archivo " + nombreArchivo + "!");
         }
         if (tamanoDeReferencia != ancho*alto)
             throw runtime_error("La imagen " + nombreArchivo + " difiere en tamano o profundidad de color y canales.");
@@ -186,4 +187,39 @@ bool obtenerParametros(int argc, char * argv[], string *metodo, string *trainSet
         ret = (metodo != NULL && trainSet != NULL && testSet != NULL && classif != NULL);
     }
     return ret;
+}
+/*
+ * nombreArchivo:   el nombre del test, pero sin el '.in' ni el '.out' el metodo se va a encargar de cargar los datos de ambos.
+ * dataSet:         la matriz que contendra las imagenes de entrada.
+ * labels:          los labels de las imagenes cargadas en dataSet.
+ * autovalores:     los 15 autovalores de mayor magnitud de la matriz de covarianza Mx (v1, v2, ..., v15) ordenados decrecientemente.
+ * */
+void cargarTest(string nombreArchivo, vector<vector<double>> *dataSet, vector<int> *labels, vector<double> *autovalores) {
+    fstream entrada(nombreArchivo + ".in", ios_base::in);
+
+    vector<string>* listaImagenes = new vector<string>(0);
+
+    string lectura;
+    bool path = true;
+    while(entrada >> lectura) {
+        lectura = explode(lectura, ',').at(0);
+        if (path) {
+            listaImagenes->push_back("./" + lectura);
+            path = false;
+        } else {
+            labels->push_back(stoi(lectura));
+            path = true;
+        }
+    }
+    entrada.close();
+
+    int tamanoDeReferencia = getTamanoImagenes(listaImagenes->at(0), &ancho, &alto);
+    cargarDataSet(*listaImagenes, tamanoDeReferencia, dataSet);
+
+    fstream salida(nombreArchivo + ".expected", ios_base::in);
+    while(salida >> lectura) {
+        autovalores->push_back(stod(lectura));
+    }
+    salida.close();
+
 }

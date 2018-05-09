@@ -596,6 +596,7 @@ void escribirEstadisiticas(string nombreArchivo, vector<pair<vector<resultados >
 
 
 
+
 int main(int argc, char * argv[]) {
     string metodo, trainSet, testSet, classif;
 /*    salida.open("Comparación_de_algoritmos.txt", ios_base::app);
@@ -609,7 +610,15 @@ int main(int argc, char * argv[]) {
 		vector<uint>* labelsX = new vector<uint > (41);
 
 
-		cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
+		//------- cargamos los datos de uno de los tests en la funcion cargarTest esta la explicacion de que hace-------------------//
+        vector<vector<double>>* dataSetTest = new vector<vector<double> >;
+        vector<int>* labelsTest = new vector<int>;
+        vector<double>* autovaloresTest = new vector<double>;
+        cargarTest("./tests/testRed", dataSetTest, labelsTest, autovaloresTest);
+        //------- cargamos los datos de uno de los tests en la funcion cargarTest esta la explicacion de que hace-------------------//
+
+
+		cargarDataSetEnMatriz("./reduced",dataSet, labelsX);
 		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSet,*labelsX,5,10,41);
         escribirEstadisiticas("./pruebaEstadisticas", dasdsa);
 
