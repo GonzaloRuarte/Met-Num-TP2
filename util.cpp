@@ -124,11 +124,19 @@ const vector<string> explode(const string& s, const char& c)
     return v;
 }
 
-void getEtiquetas(stringvec *listaImagenes, vector<uint>* etiquetas) {
-    for (uint i = 0; i < listaImagenes->size(); i++) {
-        (*etiquetas)[i] = i;
+void getEtiquetas(stringvec *listaDirectorios, vector<uint>* etiquetas) {
+		uint i = 0;
+		for (vector<string>::iterator it = listaDirectorios->begin() ; it != listaDirectorios->end(); ++it) {
+			i++;
+			string path = *it;
+			stringvec listadoImagenes;
+        		listarDirectorio(path, listadoImagenes);
+			for (vector<string>::iterator it = listadoImagenes.begin() ; it != listadoImagenes.end(); ++it) {
+        			(*etiquetas).push_back(i);
+			}
+    		}
 
-    }
+
 
 }
 

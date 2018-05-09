@@ -387,6 +387,8 @@ double accuracy (const vector<vector<double> >& trainX, const vector<clase_t>& l
 			acum++;
 		}
 	}
+	
+	
 	return acum/n;
 }	
 
@@ -402,7 +404,9 @@ double precision(const vector<vector<double> >& trainX, const vector<clase_t>& l
 			}
 		}
 	}
-	return truepositives/positives;
+	double res = 0;
+	if (positives>0){res=truepositives/positives;}
+	return res;
 }
 
 double recall(const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, const vector<vector<double> >& testY, const vector<clase_t>& labelsY, clase_t clase, uint k) {
@@ -555,7 +559,9 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 			resultados resXClase;
 			resXClase.precision = precision(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,j,kdeKnn);
 			resXClase.recall = recall(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,j,kdeKnn);
-			resXClase.f1 = 2.0*resXClase.precision*resXClase.recall/(resXClase.precision+resXClase.recall);
+			if (resXClase.precision+resXClase.recall > 0){
+				resXClase.f1 = 2.0*resXClase.precision*resXClase.recall/(resXClase.precision+resXClase.recall);
+			}
 			resXClase.clase = j;
 			resultadosTemp.push_back(resXClase);
 		}//entonces en el vector la posicion 0 corresponde a la clase 1 y asi sucesivamente
@@ -607,20 +613,20 @@ int main(int argc, char * argv[]) {
         cout << "Modo de uso: tp2 -m <method> -i <train_set> -q <test_set> -o <classif>\n";
     } else {*/
 		vector<vector<double>>* dataSet = new vector<vector<double> >;
-		vector<uint>* labelsX = new vector<uint > (41);
+		vector<uint>* labelsX = new vector<uint >;
 
 
 		//------- cargamos los datos de uno de los tests en la funcion cargarTest esta la explicacion de que hace-------------------//
-        vector<vector<double>>* dataSetTest = new vector<vector<double> >;
+       /* vector<vector<double>>* dataSetTest = new vector<vector<double> >;
         vector<int>* labelsTest = new vector<int>;
         vector<double>* autovaloresTest = new vector<double>;
-        cargarTest("./tests/testRed", dataSetTest, labelsTest, autovaloresTest);
+        cargarTest("./tests/testRed", dataSetTest, labelsTest, autovaloresTest);*/
         //------- cargamos los datos de uno de los tests en la funcion cargarTest esta la explicacion de que hace-------------------//
 
 
-		cargarDataSetEnMatriz("./reduced",dataSet, labelsX);
+		cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
 		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSet,*labelsX,5,10,41);
-        escribirEstadisiticas("./pruebaEstadisticas", dasdsa);
+       		escribirEstadisiticas("./pruebaEstadisticas", dasdsa);
 
 
 		delete labelsX;
