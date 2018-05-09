@@ -271,6 +271,7 @@ pair<double,vector<double> > metodoPotencia(const vector<vector<double> > &M) {
 /*    salida.open("Comparación_de_algoritmos.txt", ios::app);
     salida << "Iteraciones: " << cantidad_iteraciones/cantidad_iteraciones2 << ";\t Ciclos de clock: " << double((t2-t1).count())/(t4-t3).count() << endl;
     salida.close();*/
+	
     return res2;
 }
 
@@ -519,9 +520,22 @@ vector<vector<double> > PCATecho (vector<vector<double> > trainX, uint alpha) {
 
 
 vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, uint k, uint kdeKnn, uint alpha) {
-	uint imagenesPorPersona = 10; //esto podria variar si cambiamos el trainX
-	int imagenesPPparagenerador = 10; //es el mismo numero de arriba pero lo uso para generar numeros aleatorios
-	uint cantidadDeClases = 41; // idem arriba
+//codigo para calcular la cantidad de imagenes por persona suponiendo que las muestras son balanceadas y la cantidad de clases
+	uint imagenesPorPersona = 0;
+	int imagenesPPparagenerador = 0;
+	uint cantidadDeClases = 0;
+	uint personasTemp = 0;
+	for( uint i = 0; i < labelsX.size(); i++){
+		if (labelsX[i] != personasTemp){
+			personasTemp = labelsX[i];
+			cantidadDeClases++;
+		}
+		if(personasTemp == 1){
+			imagenesPorPersona++;
+			imagenesPPparagenerador++;
+		}
+	}
+//***********************************************************************//
 	vector<int> folds; //to store the random numbers
 	random_device rd; //seed generator
 	mt19937_64 generator{rd()}; //generator initialized with seed from rd
@@ -551,7 +565,7 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 			}
 		}
 		//tengo armado el train y el test para este fold
-		vector<vector<double>> V = PCATecho(trainXTemp,6);
+		vector<vector<double>> V = PCATecho(trainXTemp,alpha);
 		trainXTemp = multMat(trainXTemp,V);
 		testYTemp = multMat(testYTemp,V);
 		vector<resultados > resultadosTemp;
@@ -612,25 +626,25 @@ int main(int argc, char * argv[]) {
 /*    if (!obtenerParametros(argc, argv, &metodo, &trainSet, &testSet, &classif)) {
         cout << "Modo de uso: tp2 -m <method> -i <train_set> -q <test_set> -o <classif>\n";
     } else {*/
-		vector<vector<double>>* dataSet = new vector<vector<double> >;
-		vector<uint>* labelsX = new vector<uint >;
+		/*vector<vector<double>>* dataSet = new vector<vector<double> >;
+		vector<uint>* labelsX = new vector<uint >;*/
 
 
 		//------- cargamos los datos de uno de los tests en la funcion cargarTest esta la explicacion de que hace-------------------//
-       /* vector<vector<double>>* dataSetTest = new vector<vector<double> >;
-        vector<int>* labelsTest = new vector<int>;
+        vector<vector<double>>* dataSetTest = new vector<vector<double> >;
+        vector<uint>* labelsTest = new vector<uint>;
         vector<double>* autovaloresTest = new vector<double>;
-        cargarTest("./tests/testRed", dataSetTest, labelsTest, autovaloresTest);*/
+        cargarTest("./tests/testFullBig", dataSetTest, labelsTest, autovaloresTest);
         //------- cargamos los datos de uno de los tests en la funcion cargarTest esta la explicacion de que hace-------------------//
 
-
-		cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
-		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSet,*labelsX,5,10,41);
+		//cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
+		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSetTest,*labelsTest,5,10,6);
        		escribirEstadisiticas("./pruebaEstadisticas", dasdsa);
-
-
-		delete labelsX;
-		delete dataSet;
+		/*delete labelsX;
+		delete dataSet;*/
+		delete dataSetTest;
+		delete labelsTest;
+		delete autovaloresTest;
 
     /*}*/
 

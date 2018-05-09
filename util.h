@@ -14,6 +14,6 @@ void convertirMatrizAImagen(string pathImagen, int cantidadDeImagenes, vector<ve
  * labels:          los labels de las imagenes cargadas en dataSet.
  * autovalores:     los 15 autovalores de mayor magnitud de la matriz de covarianza Mx (v1, v2, ..., v15) ordenados decrecientemente.
  * */
-void cargarTest(string nombreArchivo, vector<vector<double>> *dataSet, vector<int> *labels, vector<double> *autovalores);
+void cargarTest(string nombreArchivo, vector<vector<double>> *dataSet, vector<uint> *labels, vector<double> *autovalores);
 
 #endif //PPMLOADER_UTIL_H
