@@ -564,6 +564,38 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 	}
 	return res;	
 }
+
+//------------------------- Escritura de las estadisticas -------------------------//
+
+void escribirEstadisiticas(string nombreArchivo, vector<pair<vector<resultados >,double> > &estadisticas) {
+    vector<resultados>* estadistica;
+    int i = 1;
+    for (vector<pair<vector<resultados >,double> >::iterator it = estadisticas.begin() ; it != estadisticas.end(); ++it) {
+        vector<resultados >& estadistica = it->first;
+        string accuracy = to_string(it->second);
+        ofstream salida(nombreArchivo + to_string(i), ios_base::out);
+        string precision = "";
+        string recall = "";
+        string f1="";
+        for (vector<resultados>::iterator it = estadistica.begin() ; it != estadistica.end(); ++it) {
+            precision += to_string(it->precision) + " ";
+            recall += to_string(it->recall) + " ";
+            f1 += to_string(it->f1) + " ";
+        }
+        salida << accuracy << endl;
+        salida << precision << endl;
+        salida << recall << endl;
+        salida << f1 << endl;
+        //cout << precision << endl;
+        salida.close();
+        i++;
+    }
+
+
+}
+
+
+
 int main(int argc, char * argv[]) {
     string metodo, trainSet, testSet, classif;
 /*    salida.open("Comparación_de_algoritmos.txt", ios_base::app);
@@ -579,6 +611,7 @@ int main(int argc, char * argv[]) {
 
 		cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
 		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSet,*labelsX,5,10,41);
+        escribirEstadisiticas("./pruebaEstadisticas", dasdsa);
 
 
 		delete labelsX;
@@ -588,3 +621,4 @@ int main(int argc, char * argv[]) {
 
     return 0;
 }
+
