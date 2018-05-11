@@ -569,7 +569,7 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 		trainXTemp = multMat(trainXTemp,V);
 		testYTemp = multMat(testYTemp,V);
 		vector<resultados > resultadosTemp;
-		for (uint j = 1; j < cantidadDeClases; j++){ //itero sobre las clases
+		for (uint j = 1; j <= cantidadDeClases; j++){ //itero sobre las clases
 			resultados resXClase;
 			resXClase.precision = precision(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,j,kdeKnn);
 			resXClase.recall = recall(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,j,kdeKnn);
