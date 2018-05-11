@@ -604,7 +604,7 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 		}
 		//tengo armado el train y el test para este fold
 		vector<vector<double>> V = PCATecho(trainXTemp,6); //92*112 = 10304, puse 6 para probar
-		uint size_V = V.size();
+		uint size_V = V[0].size();
 		vector<pair<vector<resultados >,double> > resVariandoAlphaParaUnFold;
 		for(uint h = 0; h <= 5; ++h) {//originalmente iba h<=103 y h+=100
 			for (uint i = 0; i < V.size(); i++){ //borro las columnas de V que necesito borrar para variar el alpha
