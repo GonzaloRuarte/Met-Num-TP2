@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <queue>
+#include <algorithm>
 #include <tuple>
 #include <random>
 #include <stdlib.h>
@@ -554,9 +555,9 @@ void escribirEstadisiticas(string nombreArchivo, vector<pair<vector<resultados >
         string recall = "";
         string f1="";
         for (vector<resultados>::iterator it = estadistica.begin() ; it != estadistica.end(); ++it) {
-            precision += to_string(it->precision) + " ";
-            recall += to_string(it->recall) + " ";
-            f1 += to_string(it->f1) + " ";
+            precision += to_string(it->precision) + "\t";
+            recall += to_string(it->recall) + "\t";
+            f1 += to_string(it->f1) + "\t";
         }
         salida << accuracy << endl;
         salida << precision << endl;
@@ -588,14 +589,17 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 		}
 	}
 //***********************************************************************//
-	vector<int> folds; //to store the random numbers
-	random_device rd; //seed generator
+	vector<int> folds(imagenesPorPersona); //to store the random numbers
+    for(uint i = 0; i < imagenesPorPersona; ++i)
+        folds[i] = i;
+    random_shuffle(folds.begin(), folds.end());
+/*	random_device rd; //seed generator
 	mt19937_64 generator{rd()}; //generator initialized with seed from rd
 	uniform_int_distribution<> dist{0, imagenesPPparagenerador-1}; //the range is inclusive, so this produces numbers in range [0, 10)
 	for(uint i=0; i<imagenesPorPersona; ++i) {  //REPITE NÚMEROS
 		folds.push_back( dist(generator) );
 	} // la idea es que voy a tener muestras balanceadas, entonces para cada persona voy a tener la misma cantidad de imagenes en test y en train
-		// como cada persona tiene 10 imagenes, el k puede ser 1, 2, 5 o 10, k = 1 no tiene mucho sentido
+		// como cada persona tiene 10 imagenes, el k puede ser 1, 2, 5 o 10, k = 1 no tiene mucho sentido*/
 	uint n = trainX.size()/imagenesPorPersona; //n es la cantidad de personas
 	vector<pair<vector<resultados >,double> > res;
 	for(uint i = 0; i<k; i++){ //itero sobre la cantidad de folds
