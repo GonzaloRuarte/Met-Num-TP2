@@ -518,6 +518,35 @@ vector<vector<double> > PCATecho (vector<vector<double> > trainX, uint alpha) {
 	return V; //devuelvo la V, recordar multiplicar fuera de la funcion
 }
 
+//------------------------- Escritura de las estadisticas -------------------------//
+
+void escribirEstadisiticas(string nombreArchivo, vector<pair<vector<resultados >,double> > &estadisticas, uint kDekfold) {
+    vector<resultados>* estadistica;
+    int i = 10304;
+    for (vector<pair<vector<resultados >,double> >::iterator it = estadisticas.begin() ; it != estadisticas.end(); ++it) {
+        vector<resultados >& estadistica = it->first;
+        string accuracy = to_string(it->second);
+        ofstream salida(nombreArchivo + to_string(kDekfold) + "_" + to_string(i), ios_base::out);
+        string precision = "";
+        string recall = "";
+        string f1="";
+        for (vector<resultados>::iterator it = estadistica.begin() ; it != estadistica.end(); ++it) {
+            precision += to_string(it->precision) + " ";
+            recall += to_string(it->recall) + " ";
+            f1 += to_string(it->f1) + " ";
+        }
+        salida << accuracy << endl;
+        salida << precision << endl;
+        salida << recall << endl;
+        salida << f1 << endl;
+        //cout << precision << endl;
+        salida.close();
+        i-=100;
+    }
+
+
+}
+//------------------------- Escritura de las estadisticas -------------------------//
 
 vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, uint k, uint kdeKnn, uint alpha) {
 //codigo para calcular la cantidad de imagenes por persona suponiendo que las muestras son balanceadas y la cantidad de clases
@@ -565,54 +594,38 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 			}
 		}
 		//tengo armado el train y el test para este fold
-		vector<vector<double>> V = PCATecho(trainXTemp,alpha);
-		trainXTemp = multMat(trainXTemp,V);
-		testYTemp = multMat(testYTemp,V);
-		vector<resultados > resultadosTemp;
-		for (uint j = 1; j <= cantidadDeClases; j++){ //itero sobre las clases
-			resultados resXClase;
-			resXClase.precision = precision(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,j,kdeKnn);
-			resXClase.recall = recall(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,j,kdeKnn);
-			if (resXClase.precision+resXClase.recall > 0){
-				resXClase.f1 = 2.0*resXClase.precision*resXClase.recall/(resXClase.precision+resXClase.recall);
+		vector<vector<double>> V = PCATecho(trainXTemp,10304); //92*112 = 10304
+		vector<pair<vector<resultados >,double> > resVariandoAlphaParaUnFold;
+		for(uint h = 0; h <= 103; ++h) {
+			for (uint i = 0; i < 10304; i++){ //borro las columnas de V que necesito borrar para variar el alpha
+				V[i].erase(V[i].begin()+10304-h*100, V[i].end());
 			}
-			resXClase.clase = j;
-			resultadosTemp.push_back(resXClase);
-		}//entonces en el vector la posicion 0 corresponde a la clase 1 y asi sucesivamente
-		double accuracyTemp = accuracy(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,kdeKnn);
-		res.push_back(make_pair(resultadosTemp,accuracyTemp));
+			trainXTemp = multMat(trainXTemp,V);
+			testYTemp = multMat(testYTemp,V);
+			vector<resultados > resultadosTemp;
+			//for(uint y = 0; y < 328; ++y) { //este for seria para variar el kDeKnn
+			for (uint j = 1; j <= cantidadDeClases; j++){ //itero sobre las clases
+				resultados resXClase;
+				resXClase.precision = precision(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,j,kdeKnn);
+				resXClase.recall = recall(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,j,kdeKnn);
+				if (resXClase.precision+resXClase.recall > 0){
+					resXClase.f1 = 2.0*resXClase.precision*resXClase.recall/(resXClase.precision+resXClase.recall);
+				}
+				resXClase.clase = j;
+				resultadosTemp.push_back(resXClase);
+			}//entonces en el vector la posicion 0 corresponde a la clase 1 y asi sucesivamente
+			double accuracyTemp = accuracy(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,kdeKnn);
+			//} //aca terminaria el for que varia el kDeKnn
+			resVariandoAlphaParaUnFold.push_back(make_pair(resultadosTemp,accuracyTemp));
+			
+		}
+		escribirEstadisiticas("./ResultadosVariandoAlpha", resVariandoAlphaParaUnFold,i);
+		//res.push_back(make_pair(resultadosTemp,accuracyTemp)); //comente esto porque no importa mucho lo que devuelve, solo queremos escribir los resultados en archivos
 	}
 	return res;	
 }
 
-//------------------------- Escritura de las estadisticas -------------------------//
 
-void escribirEstadisiticas(string nombreArchivo, vector<pair<vector<resultados >,double> > &estadisticas) {
-    vector<resultados>* estadistica;
-    int i = 1;
-    for (vector<pair<vector<resultados >,double> >::iterator it = estadisticas.begin() ; it != estadisticas.end(); ++it) {
-        vector<resultados >& estadistica = it->first;
-        string accuracy = to_string(it->second);
-        ofstream salida(nombreArchivo + to_string(i), ios_base::out);
-        string precision = "";
-        string recall = "";
-        string f1="";
-        for (vector<resultados>::iterator it = estadistica.begin() ; it != estadistica.end(); ++it) {
-            precision += to_string(it->precision) + " ";
-            recall += to_string(it->recall) + " ";
-            f1 += to_string(it->f1) + " ";
-        }
-        salida << accuracy << endl;
-        salida << precision << endl;
-        salida << recall << endl;
-        salida << f1 << endl;
-        //cout << precision << endl;
-        salida.close();
-        i++;
-    }
-
-
-}
 
 
 
@@ -639,7 +652,7 @@ int main(int argc, char * argv[]) {
 
 		//cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
 		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSetTest,*labelsTest,5,10,6);
-       		escribirEstadisiticas("./pruebaEstadisticas", dasdsa);
+       		//escribirEstadisiticas("./pruebaEstadisticas", dasdsa);
 		/*delete labelsX;
 		delete dataSet;*/
 		delete dataSetTest;
