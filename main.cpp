@@ -380,11 +380,21 @@ clase_t Knn (const vector<vector<double> >& trainX, const vector<clase_t>& label
 	return masRepetido.first;
 }
 
-double accuracy (const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, const vector<vector<double> >& testY, const vector<clase_t>& labelsY, uint k) {
+vector<uint> vectorDeKnns (const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, const vector<vector<double> >& testY, uint k){
+	const unsigned long& n = testY.size();
+	vector<uint> res (n);
+	for (uint i = 0; i < n; i++) {
+		res[i] = Knn(trainX,labelsX,testY[i],k);
+	}
+	return res;
+}
+
+
+double accuracy (const vector<clase_t>& labelsY, vector<uint>& vectorDeKnns) {
 	const unsigned long& n = labelsY.size(); //me di cuenta que si vamos a usar como label el numero de fila dentro de la matriz entonces el labelsY de mucho no nos sirve pero bueno
 	double acum = 0;
 	for (uint i = 0; i < n; i++) {
-		if (Knn(trainX,labelsX,testY[i],k) == labelsY[i]){
+		if (vectorDeKnns[i] == labelsY[i]){
 			acum++;
 		}
 	}
@@ -393,14 +403,13 @@ double accuracy (const vector<vector<double> >& trainX, const vector<clase_t>& l
 	return acum/n;
 }	
 
-double precision(const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, const vector<vector<double> >& testY, const vector<clase_t>& labelsY, clase_t clase, uint k) {
+double precision(const vector<clase_t>& labelsY, clase_t clase, vector<uint>& vectorDeKnns) {
     const unsigned long& n = labelsY.size();
 	double truepositives = 0, positives = 0;
 	for (uint i = 0; i < n; i++) {
-		clase_t Knnres = Knn(trainX,labelsX,testY[i],k);
-		if (Knnres == clase){ //si el Knn dio igual a la clase que estoy procesando entonces sumo 1 a los elementos recuperados
+		if (vectorDeKnns[i] == clase){ //si el Knn dio igual a la clase que estoy procesando entonces sumo 1 a los elementos recuperados
 			positives++;
-			if (Knnres == labelsY[i]){ //si el Knn ademas dio bien el resultado sumo 1 a los true positives
+			if (vectorDeKnns[i] == labelsY[i]){ //si el Knn ademas dio bien el resultado sumo 1 a los true positives
 				truepositives++;
 			}
 		}
@@ -410,13 +419,13 @@ double precision(const vector<vector<double> >& trainX, const vector<clase_t>& l
 	return res;
 }
 
-double recall(const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, const vector<vector<double> >& testY, const vector<clase_t>& labelsY, clase_t clase, uint k) {
+double recall(const vector<clase_t>& labelsY, clase_t clase, vector<uint>& vectorDeKnns) {
     const unsigned long& n = labelsY.size();
 	double truepositives = 0, relevants = 0;
 	for (uint i = 0; i < n; i++) {
 		if (labelsY[i] == clase){//si el elemento que estoy analizando pertenece a la clase que estoy procesando, sumo 1 a los relevantes
 		 	relevants++;
-			if (Knn(trainX,labelsX,testY[i],k) == clase){ //si el Knn ademas dio bien el resultado sumo 1 a los true positives
+			if (vectorDeKnns[i] == clase){ //si el Knn ademas dio bien el resultado sumo 1 a los true positives
 				truepositives++;
 			}
 		}
@@ -605,17 +614,21 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 			vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
 			vector<resultados > resultadosTemp (0);
 			//for(uint y = 0; y < 328; ++y) { //este for seria para variar el kDeKnn
+			vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,kdeKnn);
 			for (uint j = 1; j <= cantidadDeClases; j++){ //itero sobre las clases
 				resultados resXClase;
-				resXClase.precision = precision(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,j,kdeKnn);
-				resXClase.recall = recall(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,j,kdeKnn);
+				resXClase.precision = precision(labelsYTemp,j,vectordeKnns);
+				resXClase.recall = recall(labelsYTemp,j,vectordeKnns);
 				if (resXClase.precision+resXClase.recall > 0){
 					resXClase.f1 = 2.0*resXClase.precision*resXClase.recall/(resXClase.precision+resXClase.recall);
+				}
+				else {
+					resXClase.f1 = 0;
 				}
 				resXClase.clase = j;
 				resultadosTemp.push_back(resXClase);
 			}//entonces en el vector la posicion 0 corresponde a la clase 1 y asi sucesivamente
-			double accuracyTemp = accuracy(trainXTemp,labelsXTemp,testYTemp,labelsYTemp,kdeKnn);
+			double accuracyTemp = accuracy(labelsYTemp,vectordeKnns);
 			//} //aca terminaria el for que varia el kDeKnn
 			resVariandoAlphaParaUnFold.push_back(make_pair(resultadosTemp,accuracyTemp));
 			
@@ -652,7 +665,7 @@ int main(int argc, char * argv[]) {
         //------- cargamos los datos de uno de los tests en la funcion cargarTest esta la explicacion de que hace-------------------//
 
 		//cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
-		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSetTest,*labelsTest,5,2,6);
+		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSetTest,*labelsTest,5,10,6);
        		//escribirEstadisiticas("./pruebaEstadisticas", dasdsa);
 		/*delete labelsX;
 		delete dataSet;*/
