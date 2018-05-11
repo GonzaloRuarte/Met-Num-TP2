@@ -49,6 +49,20 @@ vector<vector<double> > obtenerX(const vector<vector<double> >& imgs, const vect
 	return res;
 }
 
+vector<vector<double> > obtenerXt(const vector<vector<double> >& imgs, const vector<double>& medias){
+    const unsigned long& n = imgs.size();
+    const unsigned long& m = imgs[0].size();
+    vector<vector<double> > res (m, vector<double>(n));
+    for (uint i = 0; i < m; i++){
+        for (uint j = 0; j < n; j++){
+            res[i][j] = imgs [j][i] - medias[i];//le resto la media correspondiente a cada variable
+        }
+    }
+    return res;
+}
+
+
+
 vector<vector<double> > calcularMx (const vector<vector<double> >& imgs) {
 	vector<double> medias = calcularMedias(imgs);
 	vector<vector<double> > X = obtenerX(imgs,medias);
@@ -485,7 +499,7 @@ vector<vector<double> > PCA (vector<vector<double> > trainX, uint alpha) {
 vector<vector<double> > PCATecho (vector<vector<double> > trainX, uint alpha) {
     const unsigned long& m = trainX[0].size();
 	vector<double> medias = calcularMedias(trainX);
-	vector<vector<double> > Xt = trasponer(obtenerX(trainX,medias));
+	vector<vector<double> > Xt = obtenerXt(trainX,medias);
 	vector<vector<double> > Mx = calcularMxTecho(Xt);
 	vector<vector<double> > P = generarV(Mx,alpha);
 	vector<vector<double> > V = multMat(Xt,P);
@@ -578,7 +592,7 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 	random_device rd; //seed generator
 	mt19937_64 generator{rd()}; //generator initialized with seed from rd
 	uniform_int_distribution<> dist{0, imagenesPPparagenerador-1}; //the range is inclusive, so this produces numbers in range [0, 10)
-	for(uint i=0; i<imagenesPorPersona; ++i) {
+	for(uint i=0; i<imagenesPorPersona; ++i) {  //REPITE NÚMEROS
 		folds.push_back( dist(generator) );
 	} // la idea es que voy a tener muestras balanceadas, entonces para cada persona voy a tener la misma cantidad de imagenes en test y en train
 		// como cada persona tiene 10 imagenes, el k puede ser 1, 2, 5 o 10, k = 1 no tiene mucho sentido
@@ -603,7 +617,7 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 			}
 		}
 		//tengo armado el train y el test para este fold
-		vector<vector<double>> V = PCATecho(trainXTemp,6); //92*112 = 10304, puse 6 para probar
+		vector<vector<double>> V = PCATecho(trainXTemp,alpha); //92*112 = 10304, puse 6 para probar
 		uint size_V = V[0].size();
 		vector<pair<vector<resultados >,double> > resVariandoAlphaParaUnFold;
 		for(uint h = 0; h <= 5; ++h) {//originalmente iba h<=103 y h+=100
