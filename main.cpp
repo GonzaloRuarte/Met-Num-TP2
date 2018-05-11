@@ -522,7 +522,7 @@ vector<vector<double> > PCATecho (vector<vector<double> > trainX, uint alpha) {
 
 void escribirEstadisiticas(string nombreArchivo, vector<pair<vector<resultados >,double> > &estadisticas, uint kDekfold) {
     vector<resultados>* estadistica;
-    int i = 10304;
+    int i = 6; //aca iria el alpha maximo que originalmente es 10304
     for (vector<pair<vector<resultados >,double> >::iterator it = estadisticas.begin() ; it != estadisticas.end(); ++it) {
         vector<resultados >& estadistica = it->first;
         string accuracy = to_string(it->second);
@@ -541,7 +541,7 @@ void escribirEstadisiticas(string nombreArchivo, vector<pair<vector<resultados >
         salida << f1 << endl;
         //cout << precision << endl;
         salida.close();
-        i-=100;
+        i--; //aca le resto lo que fui variando el alpha que es 100 originalmente
     }
 
 
@@ -594,15 +594,16 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 			}
 		}
 		//tengo armado el train y el test para este fold
-		vector<vector<double>> V = PCATecho(trainXTemp,10304); //92*112 = 10304
+		vector<vector<double>> V = PCATecho(trainXTemp,6); //92*112 = 10304, puse 6 para probar
+		uint size_V = V.size();
 		vector<pair<vector<resultados >,double> > resVariandoAlphaParaUnFold;
-		for(uint h = 0; h <= 103; ++h) {
-			for (uint i = 0; i < 10304; i++){ //borro las columnas de V que necesito borrar para variar el alpha
-				V[i].erase(V[i].begin()+10304-h*100, V[i].end());
+		for(uint h = 0; h <= 5; ++h) {//originalmente iba h<=103 y h+=100
+			for (uint i = 0; i < V.size(); i++){ //borro las columnas de V que necesito borrar para variar el alpha
+				V[i].erase(V[i].begin()+size_V-h, V[i].end());//originalmente va h*100 
 			}
-			trainXTemp = multMat(trainXTemp,V);
-			testYTemp = multMat(testYTemp,V);
-			vector<resultados > resultadosTemp;
+			vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
+			vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
+			vector<resultados > resultadosTemp (0);
 			//for(uint y = 0; y < 328; ++y) { //este for seria para variar el kDeKnn
 			for (uint j = 1; j <= cantidadDeClases; j++){ //itero sobre las clases
 				resultados resXClase;
@@ -619,7 +620,7 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 			resVariandoAlphaParaUnFold.push_back(make_pair(resultadosTemp,accuracyTemp));
 			
 		}
-		escribirEstadisiticas("./ResultadosVariandoAlpha", resVariandoAlphaParaUnFold,i);
+		escribirEstadisiticas("./Resultados/ResultadosVariandoAlpha", resVariandoAlphaParaUnFold,i);
 		//res.push_back(make_pair(resultadosTemp,accuracyTemp)); //comente esto porque no importa mucho lo que devuelve, solo queremos escribir los resultados en archivos
 	}
 	return res;	
@@ -651,7 +652,7 @@ int main(int argc, char * argv[]) {
         //------- cargamos los datos de uno de los tests en la funcion cargarTest esta la explicacion de que hace-------------------//
 
 		//cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
-		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSetTest,*labelsTest,5,10,6);
+		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSetTest,*labelsTest,5,2,6);
        		//escribirEstadisiticas("./pruebaEstadisticas", dasdsa);
 		/*delete labelsX;
 		delete dataSet;*/
