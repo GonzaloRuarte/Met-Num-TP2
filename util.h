@@ -7,7 +7,7 @@ void cargarDataSetEnMatriz(string pathAlDataSet, vector<vector<double>>* dataSet
 void verificarMatrizAImagen(string pathImagen, int cantidadDeImagenes, int alto, int ancho, vector<vector<double>>* dataSet);
 bool obtenerParametros(int argc, char * argv[], string *metodo, string *trainSet, string *testSet, string *classif);
 void convertirMatrizAImagen(string pathImagen, int cantidadDeImagenes, vector<vector<double>>* dataSet);
-
+ofstream getFlujo(const string& nombreArchivo);
 /*
  * nombreArchivo:   el nombre del test, pero sin el '.in' ni el '.out' el metodo se va a encargar de cargar los datos de ambos.
  * dataSet:         la matriz que contendra las imagenes de entrada.

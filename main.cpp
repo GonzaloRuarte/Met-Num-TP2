@@ -610,7 +610,7 @@ void escribirEstadisiticas(string nombreArchivo, vector<pair<vector<resultados >
     for (vector<pair<vector<resultados >,double> >::iterator it = estadisticas.begin() ; it != estadisticas.end(); ++it) {
         vector<resultados >& estadistica = it->first;
         string accuracy = to_string(it->second);
-        ofstream salida(nombreArchivo + to_string(kDekfold) + "_" + to_string(i), ios_base::out);
+        ofstream salida = getFlujo(nombreArchivo + "_" + to_string(i));
         string precision = "";
         string recall = "";
         string f1="";

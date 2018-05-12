@@ -6,6 +6,7 @@
 #include <vector>
 #include <stdio.h>
 #include <map>
+#include <sys/stat.h>
 
 #include "util.h"
 
@@ -230,4 +231,27 @@ void cargarTest(string nombreArchivo, vector<vector<double>> *dataSet, vector<ui
     }
     salida.close();
 
+}
+
+bool existeArchivo(const string& nombreArchivo) {
+    struct stat buf;
+    bool ret = false;
+    if (stat(nombreArchivo.c_str(), &buf) != -1) {
+        ret = true;
+    }
+    return ret;
+}
+
+/*
+ * Esta funcion es para que si el archivo ya existe lo abra y devuelve el flujo para agregarle datos
+ * y si no existe lo crea y devuelve el flujo agregarle datos.
+ */
+ofstream getFlujo(const string& nombreArchivo) {
+    if (existeArchivo(nombreArchivo)) {
+        ofstream ret(nombreArchivo, ios_base::app);
+        return ret;
+    } else {
+        ofstream ret2(nombreArchivo, ios_base::out);
+        return ret2;
+    }
 }
