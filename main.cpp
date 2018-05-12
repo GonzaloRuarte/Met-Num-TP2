@@ -604,9 +604,14 @@ vector<vector<double> > PCATecho (vector<vector<double> > trainX, uint alpha) {
 
 //------------------------- Escritura de las estadisticas -------------------------//
 
-void escribirEstadisiticas(string nombreArchivo, vector<pair<vector<resultados >,double> > &estadisticas, uint kDekfold) {
+void escribirEstadisiticas(string nombreArchivo, vector<pair<vector<resultados >,double> > &estadisticas, uint kDekfold,uint alpha, bool varioAlpha) { //si varioAlpha es false es porque estoy variando el kdeKnn
     vector<resultados>* estadistica;
-    int i = 6; //aca iria el alpha maximo que originalmente es 10304
+    int i;
+	if(varioAlpha){
+		i=alpha;
+	}else{
+		i= 1;
+	}
     for (vector<pair<vector<resultados >,double> >::iterator it = estadisticas.begin() ; it != estadisticas.end(); ++it) {
         vector<resultados >& estadistica = it->first;
         string accuracy = to_string(it->second);
@@ -625,7 +630,11 @@ void escribirEstadisiticas(string nombreArchivo, vector<pair<vector<resultados >
         salida << f1 << endl;
         //cout << precision << endl;
         salida.close();
-        i--; //aca le resto lo que fui variando el alpha que es 100 originalmente
+	if(varioAlpha){
+		i-=20; //le resto lo que fui variando el alpha
+	}else{
+        	i+=20; //le resto lo que fui variando el kDeKnn
+	}
     }
 
 
@@ -687,7 +696,7 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 			vector<pair<vector<resultados >,double> > resVariandoAlphaParaUnFold;
 			for(uint h = 0; h <= 5; ++h) {//esto sirve para iterar el alpha (voy borrando columnas de la matriz V dependiendo del h)
 				for (uint i = 0; i < V.size(); i++){ //borro las columnas de V que necesito borrar para variar el alpha
-					V[i].erase(V[i].begin()+size_V-h, V[i].end());//originalmente va h*100 
+					V[i].erase(V[i].begin()+size_V-h, V[i].end());//originalmente va h*20 
 				}
 				vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
 				vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
@@ -713,7 +722,7 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 				//} //aca terminaria el for que varia el kDeKnn
 			
 			}
-			escribirEstadisiticas("./Resultados/ResultadosVariandoAlpha", resVariandoAlphaParaUnFold,i);
+			escribirEstadisiticas("./Resultados/ResultadosVariandoAlpha", resVariandoAlphaParaUnFold,i,alpha,true); //true es que estoy variando el alpha
 		//res.push_back(make_pair(resultadosTemp,accuracyTemp)); //comente esto porque no importa mucho lo que devuelve, solo queremos escribir los resultados en archivos, luego de experimentar hay que cambiar esto
 		}
 		else{//sin PCA
@@ -738,7 +747,7 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 				resVariandoKSinPCAParaUnFold.push_back(make_pair(resultadosTemp,accuracyTemp)); //los resultados entran dependiendo del k, los de k=1 van primeros y los de k =321 van ultimos
 			} //aca terminaria el for que varia el kDeKnn
 
-			escribirEstadisiticas("./Resultados/ResultadosVariandoKSinPCA", resVariandoKSinPCAParaUnFold,i);
+			escribirEstadisiticas("./Resultados/ResultadosVariandoKSinPCA", resVariandoKSinPCAParaUnFold,i,0,false); //false es que estoy variando elkdeKnn, pongo 0 porque no importa en este caso ya que no estoy variando el alpha
 		//res.push_back(make_pair(resultadosTemp,accuracyTemp)); //comente esto porque no importa mucho lo que devuelve, solo queremos escribir los resultados en archivos, luego de experimentar hay que cambiar esto
 		}
 	}
