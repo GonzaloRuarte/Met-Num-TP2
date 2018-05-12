@@ -727,8 +727,8 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 		}
 		else{//sin PCA
 			vector<pair<vector<resultados >,double> > resVariandoKSinPCAParaUnFold;
-			vector<resultados > resultadosTemp (0);
 			for(uint y = 1; y < kdeKnn; y+=20) { //este for seria para variar el kDeKnn
+				vector<resultados > resultadosTemp (0);
 				vector<uint> vectordeKnns = vectorDeKnns(trainXTemp,labelsXTemp,testYTemp,y);
 				for (uint j = 1; j <= cantidadDeClases; j++){ //itero sobre las clases
 					resultados resXClase;
