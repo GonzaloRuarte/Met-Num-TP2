@@ -743,6 +743,20 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 					resXClase.clase = j;
 					resultadosTemp.push_back(resXClase);
 				}
+
+//**********************Codigo para la matriz de confusion **************//
+				uint vector_size = vectordeKnns.size();
+				vector<pair<uint,uint> > matrizConfusionDatos (vector_size);//el vector tiene el tamaño de testY
+				for (uint o = 0; o < vector_size; o++){
+					matrizConfusionDatos[i].first = labelsYTemp[i]; //la primer componente del elemento es la clase del elemento correspondiente
+					matrizConfusionDatos[i].second = vectordeKnns[i];//la segunda es la clase que devolvio el Knn
+				}
+				vector< vector<uint> > matrizConfusion (cantidadDeClases, vector<uint> (cantidadDeClases,0));
+				for (uint elem = 0; elem < vector_size; ++elem){
+						++matrizConfusion[matrizConfusionDatos[elem].first-1][matrizConfusionDatos[elem].second-1]; //
+
+				}
+//**********************Codigo para la matriz de confusion END**************//
 				double accuracyTemp = accuracy(labelsYTemp,vectordeKnns);
 				resVariandoKSinPCAParaUnFold.push_back(make_pair(resultadosTemp,accuracyTemp)); //los resultados entran dependiendo del k, los de k=1 van primeros y los de k =321 van ultimos
 			} //aca terminaria el for que varia el kDeKnn
