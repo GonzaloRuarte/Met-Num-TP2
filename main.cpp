@@ -113,7 +113,7 @@ vector<vector<double> > calcularMxTecho (const vector<vector<double> >& X) { //c
 		for (uint k = 0; k < n; k++){
 			var_i += X[k][i]*X[k][i]; //calculo de la sumatoria de productos para calcular varianza
 		}
-		res[i][i] = var_i/(n-1);
+		res[i][i] = var_i/(m-1);
 		for (uint j = i+1; j < m; j++){ //como la matriz es simetrica basta calcular la mitad superior.
 			covar_ij = 0;
 			for (uint k = 0; k < n; k++){
@@ -280,7 +280,7 @@ pair<double,vector<double> > metodoPotencia(const vector<vector<double> > &M) {
     double diferencia2 = 1;
     float cantidad_iteraciones2 = 0;
     //auto t3 = chrono::system_clock::now();
-    while(diferencia2 >= 0.000001){
+    while(diferencia2 >= 0.00000001){
         autovector2_temp = mult_matr_por_vect(M, autovector2);
         autovalor2_temp = producto_interno(autovector2, autovector2_temp); //autovector está normalizado.
         normalizar2(autovector2_temp);
@@ -366,6 +366,36 @@ vector<vector<double> > generarV(const vector<vector<double> > &mat, uint alpha)
 
 clase_t Knn (const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, const vector<double>& newImg, uint k) {//las labels podrian no ser un uint pero lo dejo asi en un principio
 	vector<pair<double,clase_t> > vecNormas (trainX.size());
+    //vector<pair<double,clase_t> > sorted(k);
+    /*
+    for (uint i = 0; i < labelsX.size(); i++) { //De las 41 labels
+        for(uint j = 0; j < 10; j++) { //Leo las 10 imagenes y tomo la distancia.
+            vecNormas[i].first  = norma2(restaVec(trainX[i],newImg));
+            vecNormas[i].second = labelsX[i];
+        }
+    }
+    make_heap(vecNormas.begin(),vecNormas.end(), greater<pair<double, clase_t> >()); //hago min-heap (para sacar los primeros k minimos.
+    for (int i = 0; i < k; i++) {
+        sorted[i].first = vecNormas[0].first;
+        sorted[i].second = vecNormas[0].second;
+        pop_heap(vecNormas.begin(), vecNormas.end(), greater<pair<double, clase_t> >());
+        vecNormas.pop_back();
+    }
+    pair<uint,int> masRepetido;
+    masRepetido.second = 0;
+    for (uint i = 0; i < labelsX.size(); i++) {//calculo del mas repetido de los k vecinos mas cercanos
+        int repetidoTemp = 0;
+        for (uint j = 0; j < k; j++) {
+            if(sorted[j].second == i){
+                repetidoTemp++;
+            }
+        }
+        if (repetidoTemp >= masRepetido.second) {
+            masRepetido.second = repetidoTemp;
+            masRepetido.first = i;
+        }
+    }
+    */
 	for (uint i = 0; i < labelsX.size(); i++) {
         vecNormas[i].first  = norma2(restaVec(trainX[i],newImg));
 		vecNormas[i].second = labelsX[i];

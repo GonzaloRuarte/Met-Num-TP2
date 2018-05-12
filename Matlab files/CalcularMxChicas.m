@@ -8,7 +8,9 @@ function [ Mx ] = CalcularMxChicas( tp2_folder )
     imgs = double(importar_imagenes_chicas(tp2_folder));
     Vm = VectorMedias(imgs);
     X = MatrizSemivarianza(imgs, Vm);
+    [n, m] = size(X);
+    raiz = sqrt(n-1);
+    X = X / raiz;
     Mx = X' * X;
-
 end
 
