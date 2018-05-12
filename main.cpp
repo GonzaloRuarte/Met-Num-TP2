@@ -3,6 +3,7 @@
 #include <vector>
 #include <queue>
 #include <algorithm>
+#include <functional>
 #include <tuple>
 #include <random>
 #include <stdlib.h>
@@ -208,15 +209,17 @@ pair<double,vector<double> > powMethod(const vector<vector<double> > &M) {
 	pair<double,vector<double> > res2;
 	uniform_real_distribution<double> unif(0.0,1.0);
 	mt19937 re(std::random_device{}());
-	auto generator = bind(unif, std::ref(re));
+	auto generator = std::bind(unif, re);
 	vector<double> autovector = vector<double>(n);
+	vector<double> autovector_temp;
 	generate(autovector.begin(), autovector.end(), generator);
 	double autovalor = sqrt(norma2(autovector));
 		
-	while(abs(sqrt(norma2(mult_matr_por_vect(M,autovector)))-sqrt(norma2(multVecEsc(autovector,autovalor))))) >0.00001){
+	while(abs(sqrt(norma2(mult_matr_por_vect(M,autovector)))-sqrt(norma2(multVecEsc(autovector,autovalor)))) >0.00001){
 		autovector_temp = mult_matr_por_vect(M,autovector);
 		autovalor = norma2(autovector_temp)/norma2(autovector);
-		autovector = normalizar2(autovector_temp);
+		autovector = autovector_temp;
+		normalizar2(autovector);
 		
 	}
 	return make_pair(autovalor,autovector);
