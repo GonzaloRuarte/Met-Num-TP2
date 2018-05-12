@@ -753,7 +753,10 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 				}
 				vector< vector<uint> > matrizConfusion (cantidadDeClases, vector<uint> (cantidadDeClases,0));
 				for (uint elem = 0; elem < vector_size; ++elem){
-						++matrizConfusion[matrizConfusionDatos[elem].first-1][matrizConfusionDatos[elem].second-1]; //
+						++matrizConfusion[matrizConfusionDatos[elem].first-1][matrizConfusionDatos[elem].second-1]; //el -1 es porque las clases van de 1 a 10 y aca la matriz se indexa de 0 a 9
+//la idea es, indexo a la fila segun la clase del elemento, y luego indexo a la columna segun lo que devolvio el knn
+//una columna sumada contiene la cantidad de veces que el knn eligio esa clase como resultado
+//idealmente la diagonal es la que va a tener numeros mas grandes
 
 				}
 //**********************Codigo para la matriz de confusion END**************//
