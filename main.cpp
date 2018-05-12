@@ -195,6 +195,33 @@ vector<double> restaVec(const vector<double> &vec1, const vector<double> &vec2) 
     return res;
 }
 
+
+vector<double> multVecEsc(const vector<double> &vec1, const double &esc) {
+    vector<double> res (vec1.size());
+    for (uint i = 0; i < vec1.size(); i++)
+        res[i] = vec1[i]*esc;
+    return res;
+}
+
+pair<double,vector<double> > powMethod(const vector<vector<double> > &M) {
+	const size_t& n = M[0].size();
+	pair<double,vector<double> > res2;
+	uniform_real_distribution<double> unif(0.0,1.0);
+	mt19937 re(std::random_device{}());
+	auto generator = bind(unif, std::ref(re));
+	vector<double> autovector = vector<double>(n);
+	generate(autovector.begin(), autovector.end(), generator);
+	double autovalor = sqrt(norma2(autovector));
+		
+	while(abs(sqrt(norma2(mult_matr_por_vect(M,autovector)))-sqrt(norma2(multVecEsc(autovector,autovalor))))) >0.00001){
+		autovector_temp = mult_matr_por_vect(M,autovector);
+		autovalor = norma2(autovector_temp)/norma2(autovector);
+		autovector = normalizar2(autovector_temp);
+		
+	}
+	return make_pair(autovalor,autovector);
+}
+
 //ofstream salida("Comparación_de_algoritmos.txt", ios_base::out);
 pair<double,vector<double> > metodoPotencia(const vector<vector<double> > &M) {
     const size_t& n = M[0].size();
