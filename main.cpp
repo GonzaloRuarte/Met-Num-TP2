@@ -746,18 +746,14 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 
 //**********************Codigo para la matriz de confusion **************//
 				uint vector_size = vectordeKnns.size();
-				vector<pair<uint,uint> > matrizConfusionDatos (vector_size);//el vector tiene el tamaño de testY
-				for (uint o = 0; o < vector_size; o++){
-					matrizConfusionDatos[o].first = labelsYTemp[o]; //la primer componente del elemento es la clase del elemento correspondiente
-					matrizConfusionDatos[o].second = vectordeKnns[o];//la segunda es la clase que devolvio el Knn
-				}
 				vector< vector<uint> > matrizConfusion (cantidadDeClases, vector<uint> (cantidadDeClases,0));
 				for (uint elem = 0; elem < vector_size; ++elem){
-						++matrizConfusion[matrizConfusionDatos[elem].first-1][matrizConfusionDatos[elem].second-1]; //el -1 es porque las clases van de 1 a 10 y aca la matriz se indexa de 0 a 9
+						++matrizConfusion[labelsYTemp[elem]-1][vectordeKnns[elem]-1]; //el -1 es porque las clases van de 1 a 10 y aca la matriz se indexa de 0 a 9
 //la idea es, indexo a la fila segun la clase del elemento, y luego indexo a la columna segun lo que devolvio el knn
 //una columna sumada contiene la cantidad de veces que el knn eligio esa clase como resultado
 //idealmente la diagonal es la que va a tener numeros mas grandes
-
+//al mirar una fila i vemos que devolvio el knn para la clase i+1
+//al mirar una columna j vemos a que clase pertenecia lo que el knn determino que era de la clase j+1
 				}
 //**********************Codigo para la matriz de confusion END**************//
 				double accuracyTemp = accuracy(labelsYTemp,vectordeKnns);
