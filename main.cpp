@@ -748,8 +748,8 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 				uint vector_size = vectordeKnns.size();
 				vector<pair<uint,uint> > matrizConfusionDatos (vector_size);//el vector tiene el tamaño de testY
 				for (uint o = 0; o < vector_size; o++){
-					matrizConfusionDatos[i].first = labelsYTemp[i]; //la primer componente del elemento es la clase del elemento correspondiente
-					matrizConfusionDatos[i].second = vectordeKnns[i];//la segunda es la clase que devolvio el Knn
+					matrizConfusionDatos[o].first = labelsYTemp[o]; //la primer componente del elemento es la clase del elemento correspondiente
+					matrizConfusionDatos[o].second = vectordeKnns[o];//la segunda es la clase que devolvio el Knn
 				}
 				vector< vector<uint> > matrizConfusion (cantidadDeClases, vector<uint> (cantidadDeClases,0));
 				for (uint elem = 0; elem < vector_size; ++elem){
