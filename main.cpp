@@ -977,7 +977,8 @@ void medirTiempos (const vector<vector<double> >& trainX, const vector<clase_t>&
 
 		}
 	}
-
+	cout << trainXTemp.size() << endl;
+	cout << testYTemp.size() << endl;
 	if(conPCA){
 		if(varioAlpha){
 			vector<vector<unsigned long> > vectorTiemposYAlpha (alpha);
@@ -993,6 +994,7 @@ void medirTiempos (const vector<vector<double> >& trainX, const vector<clase_t>&
 				RDTSC_STOP(end);
 				delta = end - start;//cada delta es el tiempo que tarda en calcular el PCA+ aplicar el cambio de base + calcular el knn para todos los elementos de testY
 				vectorTiemposYAlpha[y-1].push_back(delta);
+				cout << i << endl;
 				}
 			}
 			escribirTiempos("./Resultados/TiemposVariandoAlpha", vectorTiemposYAlpha,true,true,1,kdeKnn,alpha);
@@ -1061,7 +1063,7 @@ int main(int argc, char * argv[]) {
         //------- cargamos los datos de uno de los tests en la funcion cargarTest esta la explicacion de que hace-------------------//
 
 		//cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
-		medirTiempos(*dataSetTest,*labelsTest,5,10,10,true,true);
+		//medirTiempos(*dataSetTest,*labelsTest,5,10,10,true,true);
 		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSetTest,*labelsTest,5,328,161,false,true); //el primer bool es si uso PCA o no, el segundo bool es si vario el k o el alpha, si el primero es false no importa lo que diga el segundo
 		//primer int es el k de kfold, el segundo int es el k de knn, el 3er int es el alpha
 
