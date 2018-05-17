@@ -673,8 +673,9 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
         	folds[i] = i;
 	}
     	vector< vector<int>> foldsXpersona (n);
+	mt19937 g(static_cast<uint32_t>(time(0)));
 	for (uint i = 0; i<n;++i){
-		random_shuffle(folds.begin(), folds.end());
+		shuffle(folds.begin(), folds.end(),g);
 		foldsXpersona[i] = folds;
 	}
 /*	random_device rd; //seed generator
