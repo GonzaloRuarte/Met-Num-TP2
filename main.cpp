@@ -618,12 +618,12 @@ void escribirEstadisiticas(string nombreArchivo, vector<pair<vector<resultados >
 	ofstream salida;
 	if (conPCA){
 		if(varioAlpha){
-        		salida = getFlujo(nombreArchivo + "_K" + to_string(kdeKnninit) + "_Alpha" + to_string(i));
+        		salida = getFlujo(nombreArchivo + "K_" + to_string(kdeKnninit) + "Alpha_" + to_string(i));
 		} else{
-			salida = getFlujo(nombreArchivo + "_K" + to_string(i) + "_Alpha" + to_string(alpha));
+			salida = getFlujo(nombreArchivo + "Alpha_" + to_string(alpha) + "K_" + to_string(i));
 		}
 	} else{
-		salida = getFlujo(nombreArchivo + "_K" + to_string(i));
+		salida = getFlujo(nombreArchivo + "K_" + to_string(i));
 	}
         string precision = "";
         string recall = "";
@@ -880,7 +880,7 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 				resVariandoKSinPCAParaUnFoldFina.push_back(make_pair(resultadosTemp,accuracyTemp));
 			} //aca terminaria el for que varia el kDeKnn
 
-			escribirEstadisiticas("./Resultados/ResultadosVariandoKSinPCAFina", resVariandoKSinPCAParaUnFoldFina,i,0,false,1,1,false);//1 es porque vario el k de a 1 y el 1 porque esta iteracion arranca con k = 1
+			escribirEstadisiticas("./Resultados/ResultadosVariandoKSinPCAFina", resVariandoKSinPCAParaUnFoldFina,i,0,false,1,1,false);//el primer 1 es porque vario el k de a 1 y el segundo 1 porque esta iteracion arranca con k = 1
 
 
 
