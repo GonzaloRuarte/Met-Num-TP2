@@ -302,7 +302,6 @@ pair<double,vector<double> > metodoPotencia(const vector<vector<double> > &M) {
             autovector2 = mult_matr_por_vect(M, autovector2);
             normalizar2(autovector2_temp);
             diferencia2 = norma1(restaVec(autovector2, autovector2_temp));
-		cout << "asdasd" << endl;
         }
     }else{
         diferencia2 = norma1(restaVec(autovector2, autovector2_temp));
