@@ -977,8 +977,6 @@ void medirTiempos (const vector<vector<double> >& trainX, const vector<clase_t>&
 
 		}
 	}
-	cout << trainXTemp.size() << endl;
-	cout << testYTemp.size() << endl;
 	if(conPCA){
 		if(varioAlpha){
 			vector<vector<unsigned long> > vectorTiemposYAlpha (alpha);
@@ -994,7 +992,6 @@ void medirTiempos (const vector<vector<double> >& trainX, const vector<clase_t>&
 				RDTSC_STOP(end);
 				delta = end - start;//cada delta es el tiempo que tarda en calcular el PCA+ aplicar el cambio de base + calcular el knn para todos los elementos de testY
 				vectorTiemposYAlpha[y-1].push_back(delta);
-				cout << i << endl;
 				}
 			}
 			escribirTiempos("./Resultados/TiemposVariandoAlpha", vectorTiemposYAlpha,true,true,1,kdeKnn,alpha);
