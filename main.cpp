@@ -400,7 +400,7 @@ clase_t Knn (const vector<vector<double> >& trainX, const vector<clase_t>& label
         vecNormas[i].first  = norma2(restaVec(trainX[i],newImg));
 		vecNormas[i].second = labelsX[i];
 	}
-    vector<pair<double,clase_t> >::const_iterator primero = vecNormas.cbegin();
+    /*vector<pair<double,clase_t> >::const_iterator primero = vecNormas.cbegin();
     vector<pair<double,clase_t> >::const_iterator k_esimo = primero+k;
 	priority_queue<pair<double,clase_t> > heap(primero, k_esimo);  //Creo un max_heap con los primeros k elementos de vecNormas
 	for(size_t i = k; i < vecNormas.size(); ++i){
@@ -413,9 +413,10 @@ clase_t Knn (const vector<vector<double> >& trainX, const vector<clase_t>& label
 	for(int i = k-1; i >= 0; --i){
 	    posibles.push(heap.top().second);
 	    heap.pop();
-	}
-/*	for(uint i = 0; i < k; i++) {//sort de menor a mayor segun las normas
-		double min = 255*255*92*112;
+	}*/
+	vector<pair<double, clase_t> > sorted (0);
+	for(uint i = 0; i < k; i++) {//sort de menor a mayor segun las normas
+		double min = 670017600;
 		clase_t temp;
 		for(uint j = 0; j < vecNormas.size(); j++) {
 			if(vecNormas[j].first < min) {
@@ -425,9 +426,9 @@ clase_t Knn (const vector<vector<double> >& trainX, const vector<clase_t>& label
 		}
 		sorted.push_back(vecNormas[temp]);
 		vecNormas.erase(vecNormas.begin()+temp);
-	}*/
+	}
 	pair<clase_t,uint> masRepetido;
-	masRepetido.second = 0;
+	/*masRepetido.second = 0;
     pair<clase_t,uint> comparador;
 	while(!posibles.empty()){
         comparador = make_pair(posibles.top(), 1);
@@ -438,20 +439,19 @@ clase_t Knn (const vector<vector<double> >& trainX, const vector<clase_t>& label
         }
         if(comparador.second > masRepetido.second)
             masRepetido = comparador;
-	}
-/*	vector<pair<double, clase_t> > sorted;
-	for (uint i = 0; i < labelsX.size(); i++) {//calculo del mas repetido de los k vecinos mas cercanos
-		int repetidoTemp = 0;
+	}*/
+	for (uint i = 1; i <= 41; i++) {//calculo del mas repetido de los k vecinos mas cercanos
+		uint repetidoTemp = 0;
 		for (uint j = 0; j < k; j++) {
 			if(sorted[j].second == i){
-				repetidoTemp++;
+				++repetidoTemp;
 			}
 		}
 		if (repetidoTemp >= masRepetido.second) {
 			masRepetido.second = repetidoTemp;
 			masRepetido.first = i;
 		}
-	}*/
+	}
 	return masRepetido.first;
 }
 
@@ -789,7 +789,7 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 				vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
 				for(uint y = 1; y < kdeKnn; y+=20) { //este for seria para variar el kDeKnn
 					vector<resultados > resultadosTemp (0);
-					vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,kdeKnn);
+					vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,y);
 					for (uint j = 1; j <= cantidadDeClases; j++){ //itero sobre las clases
 						resultados resXClase;
 						resXClase.precision = precision(labelsYTemp,j,vectordeKnns);
@@ -811,7 +811,7 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 				vector<pair<vector<resultados >,double> > resVariandoKParaUnFoldFina;
 				for(uint y = 1; y <= 41; y++) { //este for seria para variar el kDeKnn
 					vector<resultados > resultadosTemp (0);
-					vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,kdeKnn);
+					vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,y);
 					for (uint j = 1; j <= cantidadDeClases; j++){ //itero sobre las clases
 						resultados resXClase;
 						resXClase.precision = precision(labelsYTemp,j,vectordeKnns);
@@ -944,7 +944,7 @@ int main(int argc, char * argv[]) {
         //------- cargamos los datos de uno de los tests en la funcion cargarTest esta la explicacion de que hace-------------------//
 
 		//cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
-		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSetTest,*labelsTest,5,328,321,false,true); //el primer bool es si uso PCA o no, el segundo bool es si vario el k o el alpha, si el primero es false no importa lo que diga el segundo
+		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSetTest,*labelsTest,5,328,10,true,false); //el primer bool es si uso PCA o no, el segundo bool es si vario el k o el alpha, si el primero es false no importa lo que diga el segundo
        		//escribirEstadisiticas("./pruebaEstadisticas", dasdsa);
 		/*delete labelsX;
 		delete dataSet;*/
