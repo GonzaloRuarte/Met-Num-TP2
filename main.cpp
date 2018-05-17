@@ -604,18 +604,27 @@ vector<vector<double> > PCATecho (vector<vector<double> > trainX, uint alpha) {
 
 //------------------------- Escritura de las estadisticas -------------------------//
 
-void escribirEstadisiticas(string nombreArchivo, vector<pair<vector<resultados >,double> > &estadisticas, uint kDekfold,uint alpha, bool varioAlpha) { //si varioAlpha es false es porque estoy variando el kdeKnn
+void escribirEstadisiticas(string nombreArchivo, vector<pair<vector<resultados >,double> > &estadisticas, uint kDekfold,uint alpha, bool varioAlpha, int variacion, uint kdeKnninit, bool conPCA) { //si varioAlpha es false es porque estoy variando el kdeKnn
     vector<resultados>* estadistica;
     int i;
 	if(varioAlpha){
 		i=alpha;
 	}else{
-		i= 1;
+		i= kdeKnninit;
 	}
     for (vector<pair<vector<resultados >,double> >::iterator it = estadisticas.begin() ; it != estadisticas.end(); ++it) {
         vector<resultados >& estadistica = it->first;
         string accuracy = to_string(it->second);
-        ofstream salida = getFlujo(nombreArchivo + "_" + to_string(i));
+	ofstream salida;
+	if (conPCA){
+		if(varioAlpha){
+        		salida = getFlujo(nombreArchivo + "_K" + to_string(kdeKnninit) + "_Alpha" + to_string(i));
+		} else{
+			salida = getFlujo(nombreArchivo + "_K" + to_string(i) + "_Alpha" + to_string(alpha));
+		}
+	} else{
+		salida = getFlujo(nombreArchivo + "_K" + to_string(i));
+	}
         string precision = "";
         string recall = "";
         string f1="";
@@ -631,9 +640,9 @@ void escribirEstadisiticas(string nombreArchivo, vector<pair<vector<resultados >
         //cout << precision << endl;
         salida.close();
 	if(varioAlpha){
-		i-=20; //le resto lo que fui variando el alpha
+		i-=variacion; //le resto lo que fui variando el alpha
 	}else{
-        	i+=20; //le resto lo que fui variando el kDeKnn
+        	i+=variacion; //le sumo lo que fui variando el kDeKnn
 	}
     }
 
@@ -641,7 +650,7 @@ void escribirEstadisiticas(string nombreArchivo, vector<pair<vector<resultados >
 }
 //------------------------- Escritura de las estadisticas -------------------------//
 
-vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, uint k, uint kdeKnn, uint alpha, bool conPCA) {
+vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, uint k, uint kdeKnn, uint alpha, bool conPCA, bool varioAlpha) {
 //codigo para calcular la cantidad de imagenes por persona suponiendo que las muestras son balanceadas y la cantidad de clases
 	uint imagenesPorPersona = 0;
 	int imagenesPPparagenerador = 0;
@@ -695,40 +704,135 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 			}
 		}
 		//tengo armado el train y el test para este fold
+		
 		if (conPCA){
-			vector<vector<double>> V = PCATecho(trainXTemp,alpha); //92*112 = 10304, puse 6 para probar
+			if(varioAlpha){
+			vector<vector<double>> V = PCATecho(trainXTemp,alpha); 
 			uint size_V = V[0].size();
 			vector<pair<vector<resultados >,double> > resVariandoAlphaParaUnFold;
-			for(uint h = 0; h <= 5; ++h) {//esto sirve para iterar el alpha (voy borrando columnas de la matriz V dependiendo del h)
+			for(uint h = 0; h <= 16; ++h) {//esto sirve para iterar el alpha (voy borrando columnas de la matriz V dependiendo del h)
 				for (uint i = 0; i < V.size(); i++){ //borro las columnas de V que necesito borrar para variar el alpha
-					V[i].erase(V[i].begin()+size_V-h, V[i].end());//originalmente va h*20 
+					V[i].erase(V[i].begin()+size_V-h*20, V[i].end());
 				}
 				vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
 				vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
-				vector<resultados > resultadosTemp (0);
-				//for(uint y = 0; y < 328; ++y) { //este for seria para variar el kDeKnn
-				vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,kdeKnn);
-				for (uint j = 1; j <= cantidadDeClases; j++){ //itero sobre las clases
-					resultados resXClase;
-					resXClase.precision = precision(labelsYTemp,j,vectordeKnns);
-					resXClase.recall = recall(labelsYTemp,j,vectordeKnns);
-					if (resXClase.precision+resXClase.recall > 0){
-						resXClase.f1 = 2.0*resXClase.precision*resXClase.recall/(resXClase.precision+resXClase.recall);
+				//for(uint y = 0; y < 321; ++y) { //este for seria para variar el kDeKnn
+					vector<resultados > resultadosTemp (0);
+					vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,kdeKnn);
+					for (uint j = 1; j <= cantidadDeClases; j++){ //itero sobre las clases
+						resultados resXClase;
+						resXClase.precision = precision(labelsYTemp,j,vectordeKnns);
+						resXClase.recall = recall(labelsYTemp,j,vectordeKnns);
+						if (resXClase.precision+resXClase.recall > 0){
+							resXClase.f1 = 2.0*resXClase.precision*resXClase.recall/(resXClase.precision+resXClase.recall);
 					}
-					else {
-						resXClase.f1 = 0;
-					}
-					resXClase.clase = j;
-					resultadosTemp.push_back(resXClase);
-				}//entonces en el vector la posicion 0 corresponde a la clase 1 y asi sucesivamente
-				double accuracyTemp = accuracy(labelsYTemp,vectordeKnns);
+						else {
+							resXClase.f1 = 0;
+						}
+						resXClase.clase = j;
+						resultadosTemp.push_back(resXClase);
+					}//entonces en el vector la posicion 0 corresponde a la clase 1 y asi sucesivamente
+					double accuracyTemp = accuracy(labelsYTemp,vectordeKnns);
 				
-				resVariandoAlphaParaUnFold.push_back(make_pair(resultadosTemp,accuracyTemp));
+					resVariandoAlphaParaUnFold.push_back(make_pair(resultadosTemp,accuracyTemp));
 				//} //aca terminaria el for que varia el kDeKnn
 			
 			}
-			escribirEstadisiticas("./Resultados/ResultadosVariandoAlpha", resVariandoAlphaParaUnFold,i,alpha,true); //true es que estoy variando el alpha
+			escribirEstadisiticas("./Resultados/ResultadosVariandoAlpha", resVariandoAlphaParaUnFold,i,alpha,true,20,kdeKnn,true); //true es que estoy variando el alpha, 20 es la variacion del alpha
+//el segundo bool es que estoy usando PCA
+			
+			V = PCATecho(trainXTemp,40);
+			size_V = V[0].size();
+			vector<pair<vector<resultados >,double> > resVariandoAlphaParaUnFoldFina;
+			for(uint h = 0; h < 41; ++h) {//puse 41 para que alpha varie desde 41 a 1
+				for (uint i = 0; i < V.size(); i++){ //borro las columnas de V que necesito borrar para variar el alpha
+					V[i].erase(V[i].begin()+size_V-h, V[i].end());
+				}
+				vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
+				vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
+				//for(uint y = 0; y < 321; ++y) { //este for seria para variar el kDeKnn
+					vector<resultados > resultadosTemp (0);
+					vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,kdeKnn);
+					for (uint j = 1; j <= cantidadDeClases; j++){ //itero sobre las clases
+						resultados resXClase;
+						resXClase.precision = precision(labelsYTemp,j,vectordeKnns);
+						resXClase.recall = recall(labelsYTemp,j,vectordeKnns);
+						if (resXClase.precision+resXClase.recall > 0){
+							resXClase.f1 = 2.0*resXClase.precision*resXClase.recall/(resXClase.precision+resXClase.recall);
+					}
+						else {
+							resXClase.f1 = 0;
+						}
+						resXClase.clase = j;
+						resultadosTemp.push_back(resXClase);
+					}
+					double accuracyTemp = accuracy(labelsYTemp,vectordeKnns);
+				
+					resVariandoAlphaParaUnFoldFina.push_back(make_pair(resultadosTemp,accuracyTemp));
+				//} //aca terminaria el for que varia el kDeKnn
+			}
+			escribirEstadisiticas("./Resultados/ResultadosVariandoAlphaFina", resVariandoAlphaParaUnFoldFina,i,41,true,1,kdeKnn,true); //41 porque el alpha varia de 41 a 1
+
+
+
+
+
+
+
+
 		//res.push_back(make_pair(resultadosTemp,accuracyTemp)); //comente esto porque no importa mucho lo que devuelve, solo queremos escribir los resultados en archivos, luego de experimentar hay que cambiar esto
+			}else{//vario k
+				vector<vector<double>> V = PCATecho(trainXTemp,alpha); 
+				uint size_V = V[0].size();
+				vector<pair<vector<resultados >,double> > resVariandoKParaUnFold;
+				vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
+				vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
+				for(uint y = 1; y < kdeKnn; y+=20) { //este for seria para variar el kDeKnn
+					vector<resultados > resultadosTemp (0);
+					vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,kdeKnn);
+					for (uint j = 1; j <= cantidadDeClases; j++){ //itero sobre las clases
+						resultados resXClase;
+						resXClase.precision = precision(labelsYTemp,j,vectordeKnns);
+						resXClase.recall = recall(labelsYTemp,j,vectordeKnns);
+						if (resXClase.precision+resXClase.recall > 0){
+							resXClase.f1 = 2.0*resXClase.precision*resXClase.recall/(resXClase.precision+resXClase.recall);
+					}
+						else {
+							resXClase.f1 = 0;
+						}
+						resXClase.clase = j;
+						resultadosTemp.push_back(resXClase);
+					}//entonces en el vector la posicion 0 corresponde a la clase 1 y asi sucesivamente
+					double accuracyTemp = accuracy(labelsYTemp,vectordeKnns);
+					resVariandoKParaUnFold.push_back(make_pair(resultadosTemp,accuracyTemp));
+				} //aca terminaria el for que varia el kDeKnn
+				escribirEstadisiticas("./Resultados/ResultadosVariandoKConPCA", resVariandoKParaUnFold,i,alpha,false,20,1,true); //false es que estoy variando el k, 20 es la variacion del alpha
+//el segundo bool es que estoy usando PCA
+				vector<pair<vector<resultados >,double> > resVariandoKParaUnFoldFina;
+				for(uint y = 1; y <= 41; y++) { //este for seria para variar el kDeKnn
+					vector<resultados > resultadosTemp (0);
+					vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,kdeKnn);
+					for (uint j = 1; j <= cantidadDeClases; j++){ //itero sobre las clases
+						resultados resXClase;
+						resXClase.precision = precision(labelsYTemp,j,vectordeKnns);
+						resXClase.recall = recall(labelsYTemp,j,vectordeKnns);
+						if (resXClase.precision+resXClase.recall > 0){
+							resXClase.f1 = 2.0*resXClase.precision*resXClase.recall/(resXClase.precision+resXClase.recall);
+					}
+						else {
+							resXClase.f1 = 0;
+						}
+						resXClase.clase = j;
+						resultadosTemp.push_back(resXClase);
+					}//entonces en el vector la posicion 0 corresponde a la clase 1 y asi sucesivamente
+					double accuracyTemp = accuracy(labelsYTemp,vectordeKnns);
+					resVariandoKParaUnFoldFina.push_back(make_pair(resultadosTemp,accuracyTemp));
+				} //aca terminaria el for que varia el kDeKnn
+				escribirEstadisiticas("./Resultados/ResultadosVariandoKConPCAFina", resVariandoKParaUnFoldFina,i,alpha,false,1,1,true); //false es que estoy variando el k, 20 es la variacion del alpha
+//el segundo bool es que estoy usando PCA
+
+
+			}	
 		}
 		else{//sin PCA
 			vector<pair<vector<resultados >,double> > resVariandoKSinPCAParaUnFold;
@@ -748,32 +852,74 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 					resXClase.clase = j;
 					resultadosTemp.push_back(resXClase);
 				}
-
-//**********************Codigo para la matriz de confusion **************//
-				uint vector_size = vectordeKnns.size();
-				vector< vector<uint> > matrizConfusion (cantidadDeClases, vector<uint> (cantidadDeClases,0));
-				for (uint elem = 0; elem < vector_size; ++elem){
-						++matrizConfusion[labelsYTemp[elem]-1][vectordeKnns[elem]-1]; //el -1 es porque las clases van de 1 a 10 y aca la matriz se indexa de 0 a 9
-//la idea es, indexo a la fila segun la clase del elemento, y luego indexo a la columna segun lo que devolvio el knn
-//una columna sumada contiene la cantidad de veces que el knn eligio esa clase como resultado
-//idealmente la diagonal es la que va a tener numeros mas grandes
-//al mirar una fila i vemos que devolvio el knn para la clase i+1
-//al mirar una columna j vemos a que clase pertenecia lo que el knn determino que era de la clase j+1
-				}
-//**********************Codigo para la matriz de confusion END**************//
 				double accuracyTemp = accuracy(labelsYTemp,vectordeKnns);
 				resVariandoKSinPCAParaUnFold.push_back(make_pair(resultadosTemp,accuracyTemp)); //los resultados entran dependiendo del k, los de k=1 van primeros y los de k =321 van ultimos
 			} //aca terminaria el for que varia el kDeKnn
 
-			escribirEstadisiticas("./Resultados/ResultadosVariandoKSinPCA", resVariandoKSinPCAParaUnFold,i,0,false); //false es que estoy variando elkdeKnn, pongo 0 porque no importa en este caso ya que no estoy variando el alpha
+			escribirEstadisiticas("./Resultados/ResultadosVariandoKSinPCA", resVariandoKSinPCAParaUnFold,i,0,false,20,1,false); //false es que estoy variando elkdeKnn, pongo 0 porque no importa en este caso ya que no estoy variando el alpha, 20 es porque vario el k de a 20, el 1 es porque el k arranca en 1 en este caso
+
+			vector<pair<vector<resultados >,double> > resVariandoKSinPCAParaUnFoldFina;
+			for(uint y = 1; y <= 41; ++y) { //este for seria para variar el kDeKnn
+				vector<resultados > resultadosTemp (0);
+				vector<uint> vectordeKnns = vectorDeKnns(trainXTemp,labelsXTemp,testYTemp,y);
+				for (uint j = 1; j <= cantidadDeClases; j++){ //itero sobre las clases
+					resultados resXClase;
+					resXClase.precision = precision(labelsYTemp,j,vectordeKnns);
+					resXClase.recall = recall(labelsYTemp,j,vectordeKnns);
+					if (resXClase.precision+resXClase.recall > 0){
+						resXClase.f1 = 2.0*resXClase.precision*resXClase.recall/(resXClase.precision+resXClase.recall);
+					}
+					else {
+						resXClase.f1 = 0;
+					}
+					resXClase.clase = j;
+					resultadosTemp.push_back(resXClase);
+				}
+
+				double accuracyTemp = accuracy(labelsYTemp,vectordeKnns);
+				resVariandoKSinPCAParaUnFoldFina.push_back(make_pair(resultadosTemp,accuracyTemp));
+			} //aca terminaria el for que varia el kDeKnn
+
+			escribirEstadisiticas("./Resultados/ResultadosVariandoKSinPCAFina", resVariandoKSinPCAParaUnFoldFina,i,0,false,1,1,false);//1 es porque vario el k de a 1 y el 1 porque esta iteracion arranca con k = 1
+
+
+
+
+
+
+
 		//res.push_back(make_pair(resultadosTemp,accuracyTemp)); //comente esto porque no importa mucho lo que devuelve, solo queremos escribir los resultados en archivos, luego de experimentar hay que cambiar esto
 		}
 	}
 	return res;	
 }
 
+//**********************Codigo para la matriz de confusion **************//
+			/*	uint vector_size = vectordeKnns.size();
+				vector< vector<uint> > matrizConfusion (cantidadDeClases, vector<uint> (cantidadDeClases,0));
+				for (uint elem = 0; elem < vector_size; ++elem){
+						++matrizConfusion[labelsYTemp[elem]-1][vectordeKnns[elem]-1];*/ //el -1 es porque las clases van de 1 a 10 y aca la matriz se indexa de 0 a 9
+//la idea es, indexo a la fila segun la clase del elemento, y luego indexo a la columna segun lo que devolvio el knn
+//una columna sumada contiene la cantidad de veces que el knn eligio esa clase como resultado
+//idealmente la diagonal es la que va a tener numeros mas grandes
+//al mirar una fila i vemos que devolvio el knn para la clase i+1
+//al mirar una columna j vemos a que clase pertenecia lo que el knn determino que era de la clase j+1
+				//}
+//**********************Codigo para la matriz de confusion END**************// //Usar cuando ya tengamos parametros elegidos
 
 
+
+
+
+       /* unsigned long delta = 0;
+        pair<vector<double>,short> ranking;
+	for (int i = 0; i < CANTIDAD_MEDICIONES; i++) {
+		unsigned long start, end;
+		RDTSC_START(start);
+		lo que se quiere medir
+		RDTSC_STOP(end);
+		delta += end - start;
+	}*/
 
 
 
@@ -798,7 +944,7 @@ int main(int argc, char * argv[]) {
         //------- cargamos los datos de uno de los tests en la funcion cargarTest esta la explicacion de que hace-------------------//
 
 		//cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
-		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSetTest,*labelsTest,5,328,328,false); //328 es la cantidad de imagenes de trainX por cada fold en el testBigFull que a su vez coincide con el rango de la matriz de covarianza y por ende la cantidad maxima de autovalores y autovectores que podemos conseguir con el metodoPotencia antes de que empiece a colgarse porque los autovalores empiezan a ser 0
+		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSetTest,*labelsTest,5,328,321,false,true); //el primer bool es si uso PCA o no, el segundo bool es si vario el k o el alpha, si el primero es false no importa lo que diga el segundo
        		//escribirEstadisiticas("./pruebaEstadisticas", dasdsa);
 		/*delete labelsX;
 		delete dataSet;*/
