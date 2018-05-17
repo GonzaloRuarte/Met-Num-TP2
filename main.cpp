@@ -302,6 +302,7 @@ pair<double,vector<double> > metodoPotencia(const vector<vector<double> > &M) {
             autovector2 = mult_matr_por_vect(M, autovector2);
             normalizar2(autovector2_temp);
             diferencia2 = norma1(restaVec(autovector2, autovector2_temp));
+		cout << "asdasd" << endl;
         }
     }else{
         diferencia2 = norma1(restaVec(autovector2, autovector2_temp));
@@ -711,9 +712,9 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 			vector<vector<double>> V = PCATecho(trainXTemp,alpha); 
 			uint size_V = V[0].size();
 			vector<pair<vector<resultados >,double> > resVariandoAlphaParaUnFold;
-			for(uint h = 0; h <= 16; ++h) {//esto sirve para iterar el alpha (voy borrando columnas de la matriz V dependiendo del h)
+			for(uint h = 0; h <= 8; ++h) {//esto sirve para iterar el alpha (voy borrando columnas de la matriz V dependiendo del h)
 				for (uint i = 0; i < V.size(); i++){ //borro las columnas de V que necesito borrar para variar el alpha
-					V[i].erase(V[i].begin()+size_V-h*20, V[i].end());
+					V[i].erase(V[i].begin()+size_V-(h*20), V[i].end());
 				}
 				vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
 				vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
@@ -739,10 +740,10 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 				//} //aca terminaria el for que varia el kDeKnn
 			
 			}
-			escribirEstadisiticas("./Resultados/ResultadosVariandoAlpha", resVariandoAlphaParaUnFold,i,alpha,true,20,kdeKnn,true); //true es que estoy variando el alpha, 20 es la variacion del alpha
+			escribirEstadisiticas("./Resultados/ResultadosVariandoAlpha", resVariandoAlphaParaUnFold,i,alpha,true,20,kdeKnn,true); //primer true es que estoy variando el alpha, 20 es la variacion del alpha
 //el segundo bool es que estoy usando PCA
 			
-			V = PCATecho(trainXTemp,40);
+			V = PCATecho(trainXTemp,41);
 			size_V = V[0].size();
 			vector<pair<vector<resultados >,double> > resVariandoAlphaParaUnFoldFina;
 			for(uint h = 0; h < 41; ++h) {//puse 41 para que alpha varie desde 41 a 1
@@ -945,7 +946,10 @@ int main(int argc, char * argv[]) {
         //------- cargamos los datos de uno de los tests en la funcion cargarTest esta la explicacion de que hace-------------------//
 
 		//cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
-		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSetTest,*labelsTest,5,328,10,true,false); //el primer bool es si uso PCA o no, el segundo bool es si vario el k o el alpha, si el primero es false no importa lo que diga el segundo
+		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSetTest,*labelsTest,5,328,161,false,true); //el primer bool es si uso PCA o no, el segundo bool es si vario el k o el alpha, si el primero es false no importa lo que diga el segundo
+		//primer int es el k de kfold, el segundo int es el k de knn, el 3er int es el alpha
+
+
        		//escribirEstadisiticas("./pruebaEstadisticas", dasdsa);
 		/*delete labelsX;
 		delete dataSet;*/
