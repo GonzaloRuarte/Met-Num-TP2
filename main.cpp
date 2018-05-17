@@ -658,10 +658,16 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 		}
 	}
 //***********************************************************************//
+	uint n = trainX.size()/imagenesPorPersona; //n es la cantidad de personas
 	vector<int> folds(imagenesPorPersona); //to store the random numbers
-    for(uint i = 0; i < imagenesPorPersona; ++i)
-        folds[i] = i;
-    random_shuffle(folds.begin(), folds.end());
+	for(uint i = 0; i < imagenesPorPersona; ++i){
+        	folds[i] = i;
+	}
+    	vector< vector<int>> foldsXpersona (n);
+	for (uint i = 0; i<n;++i){
+		random_shuffle(folds.begin(), folds.end());
+		foldsXpersona[i] = folds;
+	}
 /*	random_device rd; //seed generator
 	mt19937_64 generator{rd()}; //generator initialized with seed from rd
 	uniform_int_distribution<> dist{0, imagenesPPparagenerador-1}; //the range is inclusive, so this produces numbers in range [0, 10)
@@ -669,7 +675,6 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 		folds.push_back( dist(generator) );
 	} // la idea es que voy a tener muestras balanceadas, entonces para cada persona voy a tener la misma cantidad de imagenes en test y en train
 		// como cada persona tiene 10 imagenes, el k puede ser 1, 2, 5 o 10, k = 1 no tiene mucho sentido*/
-	uint n = trainX.size()/imagenesPorPersona; //n es la cantidad de personas
 	vector<pair<vector<resultados >,double> > res;
 	for(uint i = 0; i<k; i++){ //itero sobre la cantidad de folds
 		vector<vector<double> > trainXTemp;
@@ -678,7 +683,7 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 		vector<uint> labelsYTemp;
 		for (uint j = 0; j < n; j++){ //itero sobre la cantidad de personas
 			for (uint u = 0; u < imagenesPorPersona; u++) {//itero sobre la cantidad de imagenes por persona
-				uint temp = (j*imagenesPorPersona)+folds[u];
+				uint temp = (j*imagenesPorPersona)+foldsXpersona[j][u];
 				if (u >= i*imagenesPorPersona/k && u < (i+1)*imagenesPorPersona/k){ //si estoy en el fold que quiero
 					testYTemp.push_back(trainX[temp]);
 					labelsYTemp.push_back(labelsX[temp]); //agrego el elemento a test
