@@ -400,7 +400,7 @@ clase_t Knn (const vector<vector<double> >& trainX, const vector<clase_t>& label
         vecNormas[i].first  = norma2(restaVec(trainX[i],newImg));
 		vecNormas[i].second = labelsX[i];
 	}
-    /*vector<pair<double,clase_t> >::const_iterator primero = vecNormas.cbegin();
+    vector<pair<double,clase_t> >::const_iterator primero = vecNormas.cbegin();
     vector<pair<double,clase_t> >::const_iterator k_esimo = primero+k;
 	priority_queue<pair<double,clase_t> > heap(primero, k_esimo);  //Creo un max_heap con los primeros k elementos de vecNormas
 	for(size_t i = k; i < vecNormas.size(); ++i){
@@ -413,8 +413,8 @@ clase_t Knn (const vector<vector<double> >& trainX, const vector<clase_t>& label
 	for(int i = k-1; i >= 0; --i){
 	    posibles.push(heap.top().second);
 	    heap.pop();
-	}*/
-	vector<pair<double, clase_t> > sorted (0);
+	}
+	/*vector<pair<double, clase_t> > sorted (0);
 	for(uint i = 0; i < k; i++) {//sort de menor a mayor segun las normas
 		double min = 670017600;
 		clase_t temp;
@@ -426,9 +426,9 @@ clase_t Knn (const vector<vector<double> >& trainX, const vector<clase_t>& label
 		}
 		sorted.push_back(vecNormas[temp]);
 		vecNormas.erase(vecNormas.begin()+temp);
-	}
+	}*/
 	pair<clase_t,uint> masRepetido;
-	/*masRepetido.second = 0;
+	masRepetido.second = 0;
     pair<clase_t,uint> comparador;
 	while(!posibles.empty()){
         comparador = make_pair(posibles.top(), 1);
@@ -439,8 +439,8 @@ clase_t Knn (const vector<vector<double> >& trainX, const vector<clase_t>& label
         }
         if(comparador.second > masRepetido.second)
             masRepetido = comparador;
-	}*/
-	for (uint i = 1; i <= 41; i++) {//calculo del mas repetido de los k vecinos mas cercanos
+	}
+	/*for (uint i = 1; i <= 41; i++) {//calculo del mas repetido de los k vecinos mas cercanos
 		uint repetidoTemp = 0;
 		for (uint j = 0; j < k; j++) {
 			if(sorted[j].second == i){
@@ -451,7 +451,7 @@ clase_t Knn (const vector<vector<double> >& trainX, const vector<clase_t>& label
 			masRepetido.second = repetidoTemp;
 			masRepetido.first = i;
 		}
-	}
+	}*/
 	return masRepetido.first;
 }
 
