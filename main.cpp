@@ -300,8 +300,9 @@ pair<double,vector<double> > metodoPotencia(const vector<vector<double> > &M) {
             normalizar2(autovector2_temp);
             autovector2 = mult_matr_por_vect(M, autovector2_temp);
             autovector2 = mult_matr_por_vect(M, autovector2);
-            normalizar2(autovector2_temp);
+            normalizar2(autovector2);
             diferencia2 = norma1(restaVec(autovector2, autovector2_temp));
+            ++cantidad_iteraciones2;
         }
     }else{
         diferencia2 = norma1(restaVec(autovector2, autovector2_temp));
@@ -309,8 +310,9 @@ pair<double,vector<double> > metodoPotencia(const vector<vector<double> > &M) {
             autovector2_temp = mult_matr_por_vect(M, autovector2);
             normalizar2(autovector2_temp);
             autovector2 = mult_matr_por_vect(M, autovector2_temp);
-            normalizar2(autovector2_temp);
+            normalizar2(autovector2);
             diferencia2 = norma1(restaVec(autovector2, autovector2_temp));
+            ++cantidad_iteraciones2;
         }
     }
 /*    salida.open("Comparación_de_algoritmos.txt", ios::app);

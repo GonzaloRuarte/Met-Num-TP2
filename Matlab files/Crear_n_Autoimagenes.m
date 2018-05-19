@@ -1,4 +1,4 @@
-function [ vector_autoimagenes ] = Crear_n_Autoimagenes( tp2_folder, accuracy, n, sonImagenesChicas )
+function [ vector_autoimagenes ] = Crear_n_Autoimagenes( tp2_folder, accuracy, n, mx_chica_grande_o_grandetraspuesto )
 %CREAR_N_AUTOIMAGENES Importa las imagenes y construye los primeros n
 %autovectores. Nota importante, para acceder a la imagen i se usa
 %vector_autoimagenes(:,:,i).
@@ -10,19 +10,25 @@ function [ vector_autoimagenes ] = Crear_n_Autoimagenes( tp2_folder, accuracy, n
 %   Realiza el método de la potencia solo para los n primeros autovectores
 %   pedidos, y finalmente convierte aquellos autovectores, en matrices del
 %   tamaño de las imagenes originales, y coloca esas matrices en un vector.
-%   sonImagenesChicas es un bool, si es true, utiliza las imagenes chicas
-%   en la carpeta dada, sino usa las grandes.
-    if(sonImagenesChicas)
+%   sonImagenesChicas es un int, si es 0, utiliza las imagenes chicas
+%   en la carpeta dada, si es 1 usa las grandes, si es 2 usa las grandes pero con X*X'.
+    if(mx_chica_grande_o_grandetraspuesto == 0)
         Mx = CalcularMxChicas(tp2_folder);
-    else
+    elseif (mx_chica_grande_o_grandetraspuesto == 1)
         Mx = CalcularMx(tp2_folder);
+    else
+        Mx = CalcularMxAlRevez(tp2_folder);
     end
     V = CalcularAutoValoresVectores(Mx,accuracy,n);
-    matrix_width = size(Mx);
-    matrix_width = matrix_width(2);
-    if(matrix_width==10304)
+    matrix_height = size(Mx);
+    matrix_height = matrix_height(1);
+    if(matrix_height==10304)
         anchoim = 92;
         altoim = 112;
+    elseif(matrix_height == 410) 
+        anchoim = 18;
+        altoim = 23;
+        V = wextend('ar','zpd',V,4,'d');
     else
         anchoim = 23;
         altoim = 28;
@@ -33,4 +39,3 @@ function [ vector_autoimagenes ] = Crear_n_Autoimagenes( tp2_folder, accuracy, n
         vector_autoimagenes(:,:,i) = img; %guardo la img i en la iesima posicion
     end
 end
-
