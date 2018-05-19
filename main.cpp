@@ -281,7 +281,7 @@ pair<double,vector<double> > metodoPotencia(const vector<vector<double> > &M) {
     double diferencia2 = 1;
     float cantidad_iteraciones2 = 0;
     //auto t3 = chrono::system_clock::now();
-    while(diferencia2 >= 0.000001){
+    while(diferencia2 >= 0.0001 or cantidad_iteraciones2 < 30){
         autovector2_temp = mult_matr_por_vect(M, autovector2);
         autovalor2_temp = producto_interno(autovector2, autovector2_temp); //autovector está normalizado.
         normalizar2(autovector2_temp);
