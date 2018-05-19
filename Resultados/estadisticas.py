@@ -58,6 +58,12 @@ def obtener(clase, estadisticas, tipo):
         ret.append(estadistica[tipo][clase])
     return ret
 
+def obtener_accuracy(estadisticas):
+    ret = []
+    for estadistica in estadisticas: 
+        ret.append(estadistica['accuracy'])
+    return ret
+
 def get_promedio(estadisticas, tipo):
     ret = []
     for estadistica in estadisticas: 
@@ -78,7 +84,7 @@ def getPaleta(nombre, cantidad_de_colores):
         colores.append(mapa_de_color(j))
     return colores
 
-# Obtenemos el maximo valor maximiza el parametro medido para cada clase.
+# Obtenemos el valor maximiza el parametro medido para cada clase.
 def get_valores_que_maximiza_parametro_por_clase(estadisticas, tipo):
     cantidad_de_clases = len(estadisticas[0][tipo])
     valores_del_parametro = [0] * cantidad_de_clases
@@ -96,45 +102,75 @@ def get_valores_que_maximiza_parametro_por_clase(estadisticas, tipo):
         valor_del_parametro = valor_del_parametro + 1
 
     return [valores_del_parametro, valores_maximos]
-    
-def graficar_41_clases(directorio_estadisticas, tipo, titulo, nombre_archivo):
+
+def graficar_accuracy(directorio_estadisticas, titulo, paso_de_las_etiquetas, nombre_archivo):
     plt.clf()
     plt.figure(figsize=(10,6))
     
     estadisticas = leer_estadisticas(directorio_estadisticas)
     ests = estadisticas['estadisticas']
+    etqs = estadisticas['etiquetas']
+
+    etiquetas = [etqs[i] for i in range(0, len(etqs), paso_de_las_etiquetas)]
+
+    colores = getPaleta('Dark2', 41)
+    accuracy = obtener_accuracy(ests)
+    plt.plot(etqs, accuracy)
+
+    plt.title(titulo)
+    fig = plt.gcf()
+    ax = plt.gca()
+    ax.set_xticks(etiquetas)
+    ax.grid(color='gray', linestyle='dashed', linewidth=1)
+    plt.show()
+    plt.draw()
+    fig.savefig(nombre_archivo, dpi=600)
+
+
+def graficar_41_clases(directorio_estadisticas, tipo, titulo, nombre_archivo, paso_de_las_etiquetas):
+    plt.clf()
+    plt.figure(figsize=(10,6))
+    
+    estadisticas = leer_estadisticas(directorio_estadisticas)
+    ests = estadisticas['estadisticas']
+    etqs = estadisticas['etiquetas']
+    etiquetas = [etqs[i] for i in range(0, len(etqs), paso_de_las_etiquetas)]
+    
     
     colores = getPaleta('Dark2', 41)
 
     with plt.style.context('default'):
         for i in np.arange(40):
             j = random.sample(np.arange(10000),  1)[0]
-            plt.plot(estadisticas['etiquetas'], obtener(i, ests, tipo))
+            esti = obtener(i, ests, tipo)
+            plt.plot(etqs, esti)
 
     plt.title(titulo)
     fig = plt.gcf()
     ax = plt.gca()
-    ax.set_xticks(estadisticas['etiquetas'])
+    ax.set_xticks(etiquetas)
     ax.grid(color='gray', linestyle='dashed', linewidth=1)
     plt.show()
     plt.draw()
     fig.savefig(nombre_archivo, dpi=600)
     
     
-def graficar_estadisticas(precision, recall, f1, etiquetasX, titulo, nombre_archivo):
+def graficar_estadisticas(precision, recall, f1, etqs, paso_de_las_etiquetas, titulo, nombre_archivo):
     plt.clf()
     plt.figure(figsize=(10,6))
     
-    plt.plot(etiquetasX, precision, 'r', label = 'precision') 
-    plt.plot(etiquetasX, recall, 'b', label = 'recall')  
-    plt.plot(etiquetasX, f1, 'g', label = 'f1') 
+    etiquetas = [etqs[i] for i in range(0, len(etqs), paso_de_las_etiquetas)]
+    
+    plt.plot(etqs, precision, 'r', label = 'precision') 
+    plt.plot(etqs, recall, 'b', label = 'recall')  
+    plt.plot(etqs, f1, 'g', label = 'f1') 
     plt.legend()
     
-    plt.xlim([1, 321])
+    #plt.xlim([1, 321])
     plt.title(titulo)
     fig = plt.gcf()
     ax = plt.gca()
-    ax.set_xticks(etiquetasX)
+    ax.set_xticks(etiquetas)
     ax.grid(color='gray', linestyle='dashed', linewidth=1)
     plt.show()
     plt.draw()
@@ -143,16 +179,15 @@ def graficar_estadisticas(precision, recall, f1, etiquetasX, titulo, nombre_arch
 
     
     
-def graficar(directorio_estadisticas, titulo_grafico, nombre_archivo_imagen):
+def graficar(directorio_estadisticas, titulo_grafico, nombre_archivo_imagen, paso_de_las_etiquetas):
     estadisticas = leer_estadisticas(directorio_estadisticas)
 #    get_valores_que_maximiza_parametro_por_clase(estadisticas['estadisticas'], 'recall') 
 #    get_valores_que_maximiza_parametro_por_clase(estadisticas['estadisticas'], 'precision') 
-
     recall = get_promedio(estadisticas['estadisticas'], 'recall')
     precision = get_promedio(estadisticas['estadisticas'], 'precision')   
     f1 = get_promedio(estadisticas['estadisticas'], 'f1')   
     clase = 2
-    graficar_estadisticas(precision, recall, f1, estadisticas['etiquetas'], 
+    graficar_estadisticas(precision, recall, f1, estadisticas['etiquetas'], paso_de_las_etiquetas,
                           titulo_grafico, nombre_archivo_imagen)    
 
 
@@ -171,8 +206,9 @@ def graficar_estadisticas_barras(valores_maximizados, etiquetas, titulo, nombre_
     #cmap=plt.cm.Blues
     etqs = []
     i = 0
+    print valores_maximizados
     for k in valores_maximizados[0]:
-        etqs.append(etiquetas[k] + ' (clase ' + str(i + indice + 1) + ')')
+        etqs.append(str(etiquetas[k]) + ' (clase ' + str(i + indice + 1) + ')')
         i = i + 1
     plt.xticks(np.arange(n), etqs, rotation = 90)  # Colocamos las etiquetas del eje x
     fig = plt.gcf()
@@ -190,35 +226,53 @@ def graficar_barras(directorio_estadisticas, tipo, titulo_grafico, nombre_archiv
     ests = estadisticas['estadisticas']
     etiquetas = estadisticas['etiquetas']
     valores_maximizados = get_valores_que_maximiza_parametro_por_clase(ests, tipo)
-    valores_maximizados1 = dividir(valores_maximizados, 0, 13)
-    valores_maximizados2 = dividir(valores_maximizados, 14, 27)
-    valores_maximizados3 = dividir(valores_maximizados, 27, 40)
-    graficar_estadisticas_barras(valores_maximizados1, etiquetas, titulo_grafico, nombre_archivo_imagen + '_1.png', 0)
-    graficar_estadisticas_barras(valores_maximizados2, etiquetas, titulo_grafico, nombre_archivo_imagen + '_2.png', 14)
-    graficar_estadisticas_barras(valores_maximizados3, etiquetas, titulo_grafico, nombre_archivo_imagen + '_3.png', 27)
+    valores_maximizados1 = dividir(valores_maximizados, 0, 14)
+    valores_maximizados2 = dividir(valores_maximizados, 14, 28)
+    print "todo: " + str(valores_maximizados[1])
+    print "primer pate: " + str(valores_maximizados1[1])
+    print "seg pate: " + str(valores_maximizados2[1])
+    valores_maximizados3 = dividir(valores_maximizados, 28, 41)
+    print "tercer pate: " + str(valores_maximizados1[1])
+    graficar_estadisticas_barras(valores_maximizados1, etiquetas, 
+                                 titulo_grafico, nombre_archivo_imagen + '_1.png', 0)
+    graficar_estadisticas_barras(valores_maximizados2, etiquetas, 
+                                 titulo_grafico, nombre_archivo_imagen + '_2.png', len(valores_maximizados1[1]))
+    graficar_estadisticas_barras(valores_maximizados3, etiquetas, 
+                                 titulo_grafico, nombre_archivo_imagen + '_3.png', len(valores_maximizados1[1]) + len(valores_maximizados2[1]))
     
-#graficar_barras('/home/christian/Resultados/', 'recall',
-#                      'valores del parametro k que maximizan el recall',
-#                      '/home/christian/graficosResultados/barras_k_recall')
 
-#graficar_barras('/home/christian/Resultados/', 'precision',
-#                      'valores del parametro k que maximizan el precision',
-#                      '/home/christian/graficosResultados/barras_k_precision')
+    
+#''''''''''''''''''''''''''''
+#Para graficar variando k
+#''''''''''''''''''''''''''''
+    
+def graficar_barras_precision_recall(path, parametro):
+    graficar_barras(path, 'recall',
+                          'valores del parametro ' + parametro + ' que maximizan el recall',
+                          '/home/christian/graficosResultados/barras_recall_' + parametro )
 
-graficar('/home/christian/Resultados/', 
-                      'precision recall y f1 promediados, variando el parametro k',
-                      '/home/christian/graficosResultados/precision_recall_promediados_k.png')
-       
-graficar_41_clases('/home/christian/Resultados/', 
-                   'recall', 'recall de las 41 clases variando el parametro k', 
-                   '/home/christian/graficosResultados/recall_41_clases_k.png')
-graficar_41_clases('/home/christian/Resultados/', 'precision', 
-                   'precision de las 41 clases variando el parametro k', 
-                   '/home/christian/graficosResultados/precision_41_clases_k.png')
-graficar_41_clases('/home/christian/Resultados/', 'f1', 
-                   'f1 de las 41 clases variando el parametro k', 
-                   '/home/christian/graficosResultados/f1_41_clases_k.png')
-#graficar('/home/christian/Resultados/', 
-#         'curva Precision-Recall variando el alfa multiclase premediada',
-#         '/home/christian/graficosResultados/variandoElAlfa.png')
+    graficar_barras(path, 'precision',
+                          'valores del parametro '+ parametro + ' que maximizan el precision',
+                          '/home/christian/graficosResultados/barras_precision_' + parametro)
 
+def graficar_promedios_clases(path, parametro, paso_de_las_etiquetas):
+    graficar_accuracy(path, 'accuracy variando el parametro ' + parametro, paso_de_las_etiquetas,
+                    '/home/christian/graficosResultados/accuracy_' + parametro + '.png')
+        
+    graficar(path, 'precision recall y f1 promediados, variando el parametro ' + parametro,
+                    '/home/christian/graficosResultados/precision_recall_promediados_' + parametro + '.png',
+                    paso_de_las_etiquetas)
+
+    graficar_41_clases(path, 'recall', 'recall de las 41 clases variando el parametro ' + parametro, 
+                      '/home/christian/graficosResultados/recall_41_clases_' + parametro + '.png', 
+                       paso_de_las_etiquetas)
+    graficar_41_clases(path, 'precision', 'precision de las 41 clases variando el parametro ' + parametro, 
+                      '/home/christian/graficosResultados/precision_41_clases_' + parametro + '.png', 
+                       paso_de_las_etiquetas)
+    graficar_41_clases(path, 'f1', 'f1 de las 41 clases variando el parametro ' + parametro, 
+                      '/home/christian/graficosResultados/f1_41_clases_' + parametro + '.png', 
+                       paso_de_las_etiquetas)
+
+graficar_promedios_clases('/home/christian/Resultados/k_sin_PCA/', 'k', 1)
+graficar_promedios_clases('/home/christian/Resultados/k_sin_PCA_fina/', 'fina_k', 5)
+graficar_barras_precision_recall('/home/christian/Resultados/k_sin_PCA_fina/', 'fina_k')
