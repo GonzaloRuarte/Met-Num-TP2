@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <queue>
+#include <map>
 #include <algorithm>
 #include <functional>
 #include <tuple>
@@ -399,24 +400,46 @@ clase_t Knn (const vector<vector<double> >& trainX, const vector<clase_t>& label
     }
     */
 	for (uint i = 0; i < labelsX.size(); i++) {
-        vecNormas[i].first  = norma2(restaVec(trainX[i],newImg));
+		vecNormas[i].first  = norma2(restaVec(trainX[i],newImg));
 		vecNormas[i].second = labelsX[i];
 	}
-    vector<pair<double,clase_t> >::const_iterator primero = vecNormas.cbegin();
-    vector<pair<double,clase_t> >::const_iterator k_esimo = primero+k;
+	vector<pair<double,clase_t> >::const_iterator primero = vecNormas.cbegin();
+	vector<pair<double,clase_t> >::const_iterator k_esimo = primero+k;
 	priority_queue<pair<double,clase_t> > heap(primero, k_esimo);  //Creo un max_heap con los primeros k elementos de vecNormas
 	for(size_t i = k; i < vecNormas.size(); ++i){
-        if(vecNormas[i] < heap.top()){  //Si el i-ésimo elemento es más chico que el más grande del heap...
-            heap.pop();                 //entonces saco al más grande...
-            heap.push(vecNormas[i]);    //y meto al i-ésimo elemento.
-        }                               //De esta forma me quedo con los k elementos más chicos.
+		if(vecNormas[i] < heap.top()){  //Si el i-ésimo elemento es más chico que el más grande del heap...
+			heap.pop();                 //entonces saco al más grande...
+			heap.push(vecNormas[i]);    //y meto al i-ésimo elemento.
+		}                               //De esta forma me quedo con los k elementos más chicos.
 	}
-    priority_queue<clase_t> posibles;
+
+	map<clase_t, pair<uint, double> > candidatos;   //La 1° coordenada del significado cuenta la cantidad de apariciones.
+	while(!heap.empty()){                           //La 2° coordenada es la distancia más grande de todas las distancias que hay para una misma clase.
+		pair<clase_t, pair<uint, double> > clave_signif = make_pair(heap.top().second, make_pair(1, heap.top().first));
+		pair<map<clase_t, pair<uint, double> >::iterator, bool> it_bool = candidatos.insert(clave_signif);
+		if(not it_bool.second)  //Si la clase ya estaba en el map, debo únicamente sumar 1 a la cant. de apariciones.
+			++it_bool.first->second.first;
+		heap.pop();
+	}   //Cada clase queda asociada a la 1° distancia con la que entró, que es la más grande.
+	auto it = candidatos.begin();
+	clase_t clase = it->first;
+	uint cant_apari = it->second.first;
+	double max_dist = it->second.second;
+	while (it != candidatos.end()){
+		if(cant_apari < it->second.first || (cant_apari == it->second.first && max_dist > it->second.second)){
+			clase = it->first;
+			cant_apari = it->second.first;
+			max_dist = it->second.second;
+		}
+		++it;
+	}
+	return clase;
+/*    priority_queue<clase_t> posibles;
 	for(int i = k-1; i >= 0; --i){
 	    posibles.push(heap.top().second);
 	    heap.pop();
 	}
-	/*vector<pair<double, clase_t> > sorted (0);
+	*//*vector<pair<double, clase_t> > sorted (0);
 	for(uint i = 0; i < k; i++) {//sort de menor a mayor segun las normas
 		double min = 670017600;
 		clase_t temp;
@@ -428,7 +451,7 @@ clase_t Knn (const vector<vector<double> >& trainX, const vector<clase_t>& label
 		}
 		sorted.push_back(vecNormas[temp]);
 		vecNormas.erase(vecNormas.begin()+temp);
-	}*/
+	}*//*
 	pair<clase_t,uint> masRepetido;
 	masRepetido.second = 0;
     pair<clase_t,uint> comparador;
@@ -441,7 +464,7 @@ clase_t Knn (const vector<vector<double> >& trainX, const vector<clase_t>& label
         }
         if(comparador.second > masRepetido.second)
             masRepetido = comparador;
-	}
+	}*/
 	/*for (uint i = 1; i <= 41; i++) {//calculo del mas repetido de los k vecinos mas cercanos
 		uint repetidoTemp = 0;
 		for (uint j = 0; j < k; j++) {
@@ -454,7 +477,7 @@ clase_t Knn (const vector<vector<double> >& trainX, const vector<clase_t>& label
 			masRepetido.first = i;
 		}
 	}*/
-	return masRepetido.first;
+	/*return masRepetido.first;*/
 }
 
 vector<uint> vectorDeKnns (const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, const vector<vector<double> >& testY, uint k){
