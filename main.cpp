@@ -813,7 +813,7 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 				//} //aca terminaria el for que varia el kDeKnn
 			
 			}
-			escribirEstadisiticas("./Resultados/ResultadosVariandoAlpha/ResultadosVariandoAlpha", resVariandoAlphaParaUnFold,i,alpha,true,20,kdeKnn,true); //primer true es que estoy variando el alpha, 20 es la variacion del alpha
+			escribirEstadisiticas("./Resultados/ResultadosVariandoAlpha"+to_string(kdeKnn)+"/ResultadosVariandoAlpha", resVariandoAlphaParaUnFold,i,alpha,true,20,kdeKnn,true); //primer true es que estoy variando el alpha, 20 es la variacion del alpha
 //el segundo bool es que estoy usando PCA
 			
 			V = PCATecho(trainXTemp,21);
@@ -846,7 +846,7 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 					resVariandoAlphaParaUnFoldFina.push_back(make_pair(resultadosTemp,accuracyTemp));
 				//} //aca terminaria el for que varia el kDeKnn
 			}
-			escribirEstadisiticas("./Resultados/ResultadosVariandoAlphaFina/ResultadosVariandoAlphaFina", resVariandoAlphaParaUnFoldFina,i,21,true,1,kdeKnn,true); //41 porque el alpha varia de 41 a 1
+			escribirEstadisiticas("./Resultados/ResultadosVariandoAlphaFina"+to_string(kdeKnn)+"/ResultadosVariandoAlphaFina", resVariandoAlphaParaUnFoldFina,i,21,true,1,kdeKnn,true); //41 porque el alpha varia de 41 a 1
 
 
 
@@ -881,7 +881,7 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 					double accuracyTemp = accuracy(labelsYTemp,vectordeKnns);
 					resVariandoKParaUnFold.push_back(make_pair(resultadosTemp,accuracyTemp));
 				} //aca terminaria el for que varia el kDeKnn
-				escribirEstadisiticas("./Resultados/ResultadosVariandoKConPCA/ResultadosVariandoKConPCA", resVariandoKParaUnFold,i,alpha,false,20,1,true); //false es que estoy variando el k, 20 es la variacion del alpha
+				escribirEstadisiticas("./Resultados/ResultadosVariandoKConPCA"+to_string(alpha)+"/ResultadosVariandoKConPCA", resVariandoKParaUnFold,i,alpha,false,20,1,true); //false es que estoy variando el k, 20 es la variacion del alpha
 //el segundo bool es que estoy usando PCA
 				vector<pair<vector<resultados >,double> > resVariandoKParaUnFoldFina;
 				for(uint y = 1; y <= 41; y++) { //este for seria para variar el kDeKnn
@@ -903,7 +903,7 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 					double accuracyTemp = accuracy(labelsYTemp,vectordeKnns);
 					resVariandoKParaUnFoldFina.push_back(make_pair(resultadosTemp,accuracyTemp));
 				} //aca terminaria el for que varia el kDeKnn
-				escribirEstadisiticas("./Resultados/ResultadosVariandoKConPCAFina/ResultadosVariandoKConPCAFina", resVariandoKParaUnFoldFina,i,alpha,false,1,1,true); //false es que estoy variando el k, 20 es la variacion del alpha
+				escribirEstadisiticas("./Resultados/ResultadosVariandoKConPCAFina"+to_string(alpha)+"/ResultadosVariandoKConPCAFina", resVariandoKParaUnFoldFina,i,alpha,false,1,1,true); //false es que estoy variando el k, 20 es la variacion del alpha
 //el segundo bool es que estoy usando PCA
 
 
@@ -1037,7 +1037,7 @@ void medirTiempos (const vector<vector<double> >& trainX, const vector<clase_t>&
 				vectorTiemposYAlpha[(y-1)/20].push_back(delta);
 				}
 			}
-			escribirTiempos("./Resultados/TiemposVariandoAlpha/TiemposVariandoAlpha", vectorTiemposYAlpha,true,true,20,kdeKnn,1);
+			escribirTiempos("./Resultados/TiemposVariandoAlpha"+to_string(kdeKnn)+"/TiemposVariandoAlpha", vectorTiemposYAlpha,true,true,20,kdeKnn,1);
 
 
 			vector<vector<unsigned long> > vectorTiemposYAlphaFina (21);
@@ -1055,7 +1055,7 @@ void medirTiempos (const vector<vector<double> >& trainX, const vector<clase_t>&
 				vectorTiemposYAlphaFina[y-1].push_back(delta);
 				}
 			}
-			escribirTiempos("./Resultados/TiemposVariandoAlphaFina/TiemposVariandoAlphaFina", vectorTiemposYAlphaFina,true,true,1,kdeKnn,1);
+			escribirTiempos("./Resultados/TiemposVariandoAlphaFina"+to_string(kdeKnn)+"/TiemposVariandoAlphaFina", vectorTiemposYAlphaFina,true,true,1,kdeKnn,1);
 
 		}else{
 			vector<vector<unsigned long> > vectorTiemposYK (17);
@@ -1073,7 +1073,7 @@ void medirTiempos (const vector<vector<double> >& trainX, const vector<clase_t>&
 				vectorTiemposYK[(y-1)/20].push_back(delta);
 				}
 			}
-			escribirTiempos("./Resultados/TiemposVariandoKConPCA/TiemposVariandoKConPCA", vectorTiemposYK,true,false,20,1,alpha);
+			escribirTiempos("./Resultados/TiemposVariandoKConPCA"+to_string(alpha)+"/TiemposVariandoKConPCA", vectorTiemposYK,true,false,20,1,alpha);
 		
 		
 		vector<vector<unsigned long> > vectorTiemposYKFina (41);
@@ -1091,7 +1091,7 @@ void medirTiempos (const vector<vector<double> >& trainX, const vector<clase_t>&
 				vectorTiemposYKFina[y-1].push_back(delta);
 				}
 			}
-			escribirTiempos("./Resultados/TiemposVariandoKConPCAFina/TiemposVariandoKConPCAFina", vectorTiemposYKFina,true,false,1,1,alpha);
+			escribirTiempos("./Resultados/TiemposVariandoKConPCAFina"+to_string(alpha)+"/TiemposVariandoKConPCAFina", vectorTiemposYKFina,true,false,1,1,alpha);
 		}
 
 	}else{
@@ -1159,7 +1159,7 @@ int main(int argc, char * argv[]) {
 
 		//cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
 		//medirTiempos(*dataSetTest,*labelsTest,5,10,10,true,true);
-		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSetTest,*labelsTest,5,1,321,true,true); //el primer bool es si uso PCA o no, el segundo bool es si vario el k o el alpha, si el primero es false no importa lo que diga el segundo
+		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSetTest,*labelsTest,5,328,321,false,true); //el primer bool es si uso PCA o no, el segundo bool es si vario el k o el alpha, si el primero es false no importa lo que diga el segundo
 		//primer int es el k de kfold, el segundo int es el k de knn, el 3er int es el alpha
 
 
