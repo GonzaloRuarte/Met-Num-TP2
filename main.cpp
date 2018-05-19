@@ -280,7 +280,7 @@ pair<double,vector<double> > metodoPotencia(const vector<vector<double> > &M) {
     double diferencia2 = 1;
     float cantidad_iteraciones2 = 0;
     //auto t3 = chrono::system_clock::now();
-    while(diferencia2 >= 0.00000001){
+    while(diferencia2 >= 0.000001){
         autovector2_temp = mult_matr_por_vect(M, autovector2);
         autovalor2_temp = producto_interno(autovector2, autovector2_temp); //autovector está normalizado.
         normalizar2(autovector2_temp);
@@ -742,9 +742,9 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 			vector<vector<double>> V = PCATecho(trainXTemp,alpha); 
 			uint size_V = V[0].size();
 			vector<pair<vector<resultados >,double> > resVariandoAlphaParaUnFold;
-			for(uint h = 0; h <= 8; ++h) {//esto sirve para iterar el alpha (voy borrando columnas de la matriz V dependiendo del h)
-				for (uint i = 0; i < V.size(); i++){ //borro las columnas de V que necesito borrar para variar el alpha
-					V[i].erase(V[i].begin()+size_V-(h*20), V[i].end());
+			for(uint h = 0; h <= 320; h+=20) {//esto sirve para iterar el alpha (voy borrando columnas de la matriz V dependiendo del h)
+				for (uint o = 0; o < V.size(); o++){ //borro las columnas de V que necesito borrar para variar el alpha
+					V[o].erase(V[o].begin()+size_V-h, V[o].end());
 				}
 				vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
 				vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
@@ -773,12 +773,12 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 			escribirEstadisiticas("./Resultados/ResultadosVariandoAlpha", resVariandoAlphaParaUnFold,i,alpha,true,20,kdeKnn,true); //primer true es que estoy variando el alpha, 20 es la variacion del alpha
 //el segundo bool es que estoy usando PCA
 			
-			V = PCATecho(trainXTemp,41);
+			V = PCATecho(trainXTemp,21);
 			size_V = V[0].size();
 			vector<pair<vector<resultados >,double> > resVariandoAlphaParaUnFoldFina;
-			for(uint h = 0; h < 41; ++h) {//puse 41 para que alpha varie desde 41 a 1
-				for (uint i = 0; i < V.size(); i++){ //borro las columnas de V que necesito borrar para variar el alpha
-					V[i].erase(V[i].begin()+size_V-h, V[i].end());
+			for(uint h = 0; h < 21; ++h) {//puse 41 para que alpha varie desde 41 a 1
+				for (uint o = 0; o < V.size(); o++){ //borro las columnas de V que necesito borrar para variar el alpha
+					V[o].erase(V[o].begin()+size_V-h, V[o].end());
 				}
 				vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
 				vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
@@ -803,7 +803,7 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 					resVariandoAlphaParaUnFoldFina.push_back(make_pair(resultadosTemp,accuracyTemp));
 				//} //aca terminaria el for que varia el kDeKnn
 			}
-			escribirEstadisiticas("./Resultados/ResultadosVariandoAlphaFina", resVariandoAlphaParaUnFoldFina,i,41,true,1,kdeKnn,true); //41 porque el alpha varia de 41 a 1
+			escribirEstadisiticas("./Resultados/ResultadosVariandoAlphaFina", resVariandoAlphaParaUnFoldFina,i,21,true,1,kdeKnn,true); //41 porque el alpha varia de 41 a 1
 
 
 
@@ -1061,7 +1061,7 @@ int main(int argc, char * argv[]) {
 
 		//cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
 		//medirTiempos(*dataSetTest,*labelsTest,5,10,10,true,true);
-		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSetTest,*labelsTest,5,328,161,false,true); //el primer bool es si uso PCA o no, el segundo bool es si vario el k o el alpha, si el primero es false no importa lo que diga el segundo
+		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSetTest,*labelsTest,5,1,321,true,true); //el primer bool es si uso PCA o no, el segundo bool es si vario el k o el alpha, si el primero es false no importa lo que diga el segundo
 		//primer int es el k de kfold, el segundo int es el k de knn, el 3er int es el alpha
 
 
