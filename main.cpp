@@ -1034,7 +1034,7 @@ void medirTiempos (const vector<vector<double> >& trainX, const vector<clase_t>&
 				vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,kdeKnn);
 				RDTSC_STOP(end);
 				delta = end - start;//cada delta es el tiempo que tarda en calcular el PCA+ aplicar el cambio de base + calcular el knn para todos los elementos de testY
-				vectorTiemposYAlpha[y-1].push_back(delta);
+				vectorTiemposYAlpha[(y-1)/20].push_back(delta);
 				}
 			}
 			escribirTiempos("./Resultados/TiemposVariandoAlpha/TiemposVariandoAlpha", vectorTiemposYAlpha,true,true,20,kdeKnn,1);
@@ -1070,7 +1070,7 @@ void medirTiempos (const vector<vector<double> >& trainX, const vector<clase_t>&
 				vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,y);
 				RDTSC_STOP(end);
 				delta = end - start;//cada delta es el tiempo que tarda en calcular el PCA+ aplicar el cambio de base + calcular el knn para todos los elementos de testY
-				vectorTiemposYK[y-1].push_back(delta);
+				vectorTiemposYK[(y-1)/20].push_back(delta);
 				}
 			}
 			escribirTiempos("./Resultados/TiemposVariandoKConPCA/TiemposVariandoKConPCA", vectorTiemposYK,true,false,20,1,alpha);
@@ -1104,7 +1104,7 @@ void medirTiempos (const vector<vector<double> >& trainX, const vector<clase_t>&
 				vector<uint> vectordeKnns = vectorDeKnns(trainXTemp,labelsXTemp,testYTemp,y);
 				RDTSC_STOP(end);
 				delta = end - start;//cada delta es el tiempo que tarda en calcular el knn para todos los elementos de testY
-				vectorTiemposYK[y-1].push_back(delta);
+				vectorTiemposYK[(y-1)/20].push_back(delta);
 			}
 
 		}
