@@ -15,5 +15,6 @@ ofstream getFlujo(const string& nombreArchivo);
  * autovalores:     los 15 autovalores de mayor magnitud de la matriz de covarianza Mx (v1, v2, ..., v15) ordenados decrecientemente.
  * */
 void cargarTest(string nombreArchivo, vector<vector<double>> *dataSet, vector<uint> *labels, vector<double> *autovalores);
+string int2stringConCantidadDigitos(int cantidadDigitos, int i);
 
 #endif //PPMLOADER_UTIL_H

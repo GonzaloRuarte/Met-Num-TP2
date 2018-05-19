@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <map>
 #include <sys/stat.h>
+#include <sstream>
 
 #include "util.h"
 
@@ -242,11 +243,31 @@ bool existeArchivo(const string& nombreArchivo) {
     return ret;
 }
 
+bool is_file_exist(const char *fileName) {
+    std::ifstream infile(fileName);
+    return infile.good();
+}
+
+void crearCarpetaSiNoExiste(string path) {
+    if (!is_file_exist(path.c_str())) {
+        mkdir(path.c_str(), S_IRWXU);
+    }
+}
+
+void crearUltimaCarpetaSiNoExiste(string nombreArchivo) {
+    vector<string> v{explode(nombreArchivo, '/')};
+    string carpeta = "";
+    for (int i=0; i<v.size()-1; i++)
+        carpeta += v[i] + "/";
+    crearCarpetaSiNoExiste(carpeta);
+}
+
 /*
  * Esta funcion es para que si el archivo ya existe lo abra y devuelve el flujo para agregarle datos
  * y si no existe lo crea y devuelve el flujo agregarle datos.
  */
 ofstream getFlujo(const string& nombreArchivo) {
+    crearUltimaCarpetaSiNoExiste(nombreArchivo);
     if (existeArchivo(nombreArchivo)) {
         ofstream ret(nombreArchivo, ios_base::app);
         return ret;
@@ -255,3 +276,14 @@ ofstream getFlujo(const string& nombreArchivo) {
         return ret2;
     }
 }
+
+string int2stringConCantidadDigitos(int cantidadDigitos, int i){
+    stringstream flujo;
+    flujo.fill  ('0');
+    flujo.width (cantidadDigitos);
+    flujo << i;
+    return(flujo.str());
+}
+
+
+
