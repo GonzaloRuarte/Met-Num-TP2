@@ -735,6 +735,22 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 
 			}
 		}
+//*********************Codigo para achicar data set de training ***************//
+		/*uint imagenesPorPersonaEnFold = (k-1)*imagenesPorPersona/k;
+		for (uint j = 0; j < imagenesPorPersonaEnFold-1; ++j){//itero sobre la cantidad de imagenes por persona en el fold, la idea es dejar siempre las muestras balanceadas, pero al final tener una de cada uno
+			for (uint u = 0; u < n; ++u){//itero sobre la cantidad de personas
+				trainXTemp.erase(begin+(n-1-u)*imagenesPorPersonaEnFold); //borro la ultima imagen de cada uno en cada paso
+
+			//aca iria la parte de calcular el PCATecho y los resultados cuando querramos variar esto
+
+
+
+
+			}
+			--imagenesPorPersonaEnFold;
+
+		}*/
+//*********************Codigo para achicar data set de training END***************//
 		//tengo armado el train y el test para este fold
 		
 		if (conPCA){
@@ -742,7 +758,7 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 			vector<vector<double>> V = PCATecho(trainXTemp,alpha); 
 			uint size_V = V[0].size();
 			vector<pair<vector<resultados >,double> > resVariandoAlphaParaUnFold;
-			for(uint h = 0; h <= 320; h+=20) {//esto sirve para iterar el alpha (voy borrando columnas de la matriz V dependiendo del h)
+			for(uint h = 0; h <= alpha-1; h+=20) {//esto sirve para iterar el alpha (voy borrando columnas de la matriz V dependiendo del h)
 				for (uint o = 0; o < V.size(); o++){ //borro las columnas de V que necesito borrar para variar el alpha
 					V[o].erase(V[o].begin()+size_V-h, V[o].end());
 				}
