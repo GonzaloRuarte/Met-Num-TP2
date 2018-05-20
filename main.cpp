@@ -1042,7 +1042,7 @@ void medirTiempos (const vector<vector<double> >& trainX, const vector<clase_t>&
 			escribirTiempos("./Resultados/TiemposVariandoAlpha"+to_string(kdeKnn)+"/TiemposVariandoAlpha", vectorTiemposYAlpha,true,true,20,kdeKnn,1);
 
 			vector<vector<unsigned long> > vectorTiemposYAlphaFina (61);
-			V = PCATecho(trainXTemp,alpha); 
+			V = PCATecho(trainXTemp,61); 
 			size_V = V[0].size();
 			for(uint h = 0; h <= 60; ++h) {//esto sirve para iterar el alpha (voy borrando columnas de la matriz V dependiendo del h)
 				for (uint o = 0; o < V.size(); o++){ //borro las columnas de V que necesito borrar para variar el alpha
