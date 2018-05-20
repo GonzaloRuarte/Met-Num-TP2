@@ -1057,7 +1057,7 @@ void medirTiempos (const vector<vector<double> >& trainX, const vector<clase_t>&
                     			vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,kdeKnn);
                     			RDTSC_STOP(end);
                     			delta = end - start;//cada delta es el tiempo que tarda en calcular el PCA+ aplicar el cambio de base + calcular el knn para todos los elementos de testY
-                    			vectorTiemposYAlpha[size_V-h-1].push_back(delta);
+                    			vectorTiemposYAlphaFina[size_V-h-1].push_back(delta);
 				}
 			}
 			escribirTiempos("./Resultados/TiemposVariandoAlphaFina"+to_string(kdeKnn)+"/TiemposVariandoAlphaFina", vectorTiemposYAlphaFina,true,true,1,kdeKnn,1);
