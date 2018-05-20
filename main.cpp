@@ -1020,56 +1020,58 @@ void medirTiempos (const vector<vector<double> >& trainX, const vector<clase_t>&
 	}
 	if(conPCA){
 		if(varioAlpha){
-			vector<vector<unsigned long> > vectorTiemposYAlpha (15);
-            vector<vector<double>> V = PCATecho(trainXTemp,alpha);
-			while(alpha > 21){      //for(uint y = alpha; y > 21; y-=20){
-			    for(uint j = 0; j < V.size(); ++j)  //Me quedo con las 1°s alpha columnas, que son los autovectores más importantes
-			        V[j].erase(V[j].begin()+alpha, V[j].end());
-                vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
-                vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
-				for (int i = 0; i < 20; i++) {
-                    unsigned long start, end;
-                    unsigned long delta = 0;
-                    RDTSC_START(start);
-                    vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,kdeKnn);
-                    RDTSC_STOP(end);
-                    delta = end - start;//cada delta es el tiempo que tarda en calcular el PCA+ aplicar el cambio de base + calcular el knn para todos los elementos de testY
-                    vectorTiemposYAlpha[((alpha-1)/20)-2].push_back(delta);
+			vector<vector<unsigned long> > vectorTiemposYAlpha (17);
+			vector<vector<double>> V = PCATecho(trainXTemp,alpha); 
+			uint size_V = V[0].size();
+			for(uint h = 0; h <= alpha-1; h+=20) {//esto sirve para iterar el alpha (voy borrando columnas de la matriz V dependiendo del h)
+				for (uint o = 0; o < V.size(); o++){ //borro las columnas de V que necesito borrar para variar el alpha
+					V[o].erase(V[o].begin()+size_V-h, V[o].end());
 				}
-				alpha -= 20;
+				vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
+				vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
+				for (int i = 0; i < 20; i++) {
+                    			unsigned long start, end;
+                    			unsigned long delta = 0;
+                    			RDTSC_START(start);
+                    			vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,kdeKnn);
+                    			RDTSC_STOP(end);
+                    			delta = end - start;//cada delta es el tiempo que tarda en calcular el PCA+ aplicar el cambio de base + calcular el knn para todos los elementos de testY
+                    			vectorTiemposYAlpha[(size_V-h-1)/20].push_back(delta);
+				}
 			}
-			escribirTiempos("./Resultados/TiemposVariandoAlpha"+to_string(kdeKnn)+"/TiemposVariandoAlpha", vectorTiemposYAlpha,true,true,20,kdeKnn,41);
+			escribirTiempos("./Resultados/TiemposVariandoAlpha"+to_string(kdeKnn)+"/TiemposVariandoAlpha", vectorTiemposYAlpha,true,true,20,kdeKnn,1);
 
-
-			vector<vector<unsigned long> > vectorTiemposYAlphaFina (21);
-			while(alpha > 0){        //for(uint y = 1; y <= 21; ++y){
-                for(uint j = 0; j < V.size(); ++j)  //Me quedo con las 1°s alpha columnas, que son los autovectores más importantes
-                    V[j].erase(V[j].begin()+alpha, V[j].end());
-                vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
-                vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
-				for (int i = 0; i < 20; i++) {
-                    unsigned long start, end;
-                    unsigned long delta = 0;
-                    RDTSC_START(start);
-                    vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,kdeKnn);
-                    RDTSC_STOP(end);
-                    delta = end - start;//cada delta es el tiempo que tarda en calcular el PCA+ aplicar el cambio de base + calcular el knn para todos los elementos de testY
-                    vectorTiemposYAlphaFina[alpha-1].push_back(delta);
+			vector<vector<unsigned long> > vectorTiemposYAlphaFina (61);
+			V = PCATecho(trainXTemp,alpha); 
+			size_V = V[0].size();
+			for(uint h = 0; h <= 60; ++h) {//esto sirve para iterar el alpha (voy borrando columnas de la matriz V dependiendo del h)
+				for (uint o = 0; o < V.size(); o++){ //borro las columnas de V que necesito borrar para variar el alpha
+					V[o].erase(V[o].begin()+size_V-h, V[o].end());
 				}
-				--alpha;
+				vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
+				vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
+				for (int i = 0; i < 20; i++) {
+                    			unsigned long start, end;
+                    			unsigned long delta = 0;
+                    			RDTSC_START(start);
+                    			vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,kdeKnn);
+                    			RDTSC_STOP(end);
+                    			delta = end - start;//cada delta es el tiempo que tarda en calcular el PCA+ aplicar el cambio de base + calcular el knn para todos los elementos de testY
+                    			vectorTiemposYAlpha[size_V-h-1].push_back(delta);
+				}
 			}
 			escribirTiempos("./Resultados/TiemposVariandoAlphaFina"+to_string(kdeKnn)+"/TiemposVariandoAlphaFina", vectorTiemposYAlphaFina,true,true,1,kdeKnn,1);
 
 		}else{
 			vector<vector<unsigned long> > vectorTiemposYK (17);
+			vector<vector<double>> V = PCATecho(trainXTemp,alpha);
+			vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
+			vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
 			for(uint y = 1; y <= kdeKnn; y+=20){
 				for (int i = 0; i < 20; i++) {
 				unsigned long start, end;
 				unsigned long delta = 0;
 				RDTSC_START(start);
-				vector<vector<double>> V = PCATecho(trainXTemp,alpha);
-				vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
-				vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
 				vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,y);
 				RDTSC_STOP(end);
 				delta = end - start;//cada delta es el tiempo que tarda en calcular el PCA+ aplicar el cambio de base + calcular el knn para todos los elementos de testY
@@ -1079,15 +1081,15 @@ void medirTiempos (const vector<vector<double> >& trainX, const vector<clase_t>&
 			escribirTiempos("./Resultados/TiemposVariandoKConPCA"+to_string(alpha)+"/TiemposVariandoKConPCA", vectorTiemposYK,true,false,20,1,alpha);
 		
 		
-		vector<vector<unsigned long> > vectorTiemposYKFina (41);
+			vector<vector<unsigned long> > vectorTiemposYKFina (41);
+			V = PCATecho(trainXTemp,alpha);
+			trainXTemp2 = multMat(trainXTemp,V);
+			testYTemp2 = multMat(testYTemp,V);
 			for(uint y = 1; y <= 41; ++y){
 				for (int i = 0; i < 20; i++) {
 				unsigned long start, end;
 				unsigned long delta = 0;
 				RDTSC_START(start);
-				vector<vector<double>> V = PCATecho(trainXTemp,alpha);
-				vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
-				vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
 				vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,y);
 				RDTSC_STOP(end);
 				delta = end - start;//cada delta es el tiempo que tarda en calcular el PCA+ aplicar el cambio de base + calcular el knn para todos los elementos de testY
