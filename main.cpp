@@ -814,10 +814,10 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 			escribirEstadisiticas("./Resultados/ResultadosVariandoAlpha"+to_string(kdeKnn)+"/ResultadosVariandoAlpha", resVariandoAlphaParaUnFold,i,alpha,true,20,kdeKnn,true); //primer true es que estoy variando el alpha, 20 es la variacion del alpha
 //el segundo bool es que estoy usando PCA
 			
-			V = PCATecho(trainXTemp,21);
+			V = PCATecho(trainXTemp,61);
 			size_V = V[0].size();
 			vector<pair<vector<resultados >,double> > resVariandoAlphaParaUnFoldFina;
-			for(uint h = 0; h < 21; ++h) {//puse 41 para que alpha varie desde 41 a 1
+			for(uint h = 0; h < 61; ++h) {//puse 41 para que alpha varie desde 41 a 1
 				for (uint o = 0; o < V.size(); o++){ //borro las columnas de V que necesito borrar para variar el alpha
 					V[o].erase(V[o].begin()+size_V-h, V[o].end());
 				}
@@ -844,7 +844,7 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 					resVariandoAlphaParaUnFoldFina.push_back(make_pair(resultadosTemp,accuracyTemp));
 				//} //aca terminaria el for que varia el kDeKnn
 			}
-			escribirEstadisiticas("./Resultados/ResultadosVariandoAlphaFina"+to_string(kdeKnn)+"/ResultadosVariandoAlphaFina", resVariandoAlphaParaUnFoldFina,i,21,true,1,kdeKnn,true); //41 porque el alpha varia de 41 a 1
+			escribirEstadisiticas("./Resultados/ResultadosVariandoAlphaFina"+to_string(kdeKnn)+"/ResultadosVariandoAlphaFina", resVariandoAlphaParaUnFoldFina,i,61,true,1,kdeKnn,true); //41 porque el alpha varia de 41 a 1
 
 
 
