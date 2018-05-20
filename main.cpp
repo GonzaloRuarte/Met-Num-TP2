@@ -629,7 +629,7 @@ vector<vector<double> > PCATecho (vector<vector<double> > trainX, uint alpha) {
 
 //------------------------- Escritura de las estadisticas -------------------------//
 void escribirTiempos(string nombreArchivo, vector<vector<unsigned long> > &tiempos, bool conPCA, bool varioAlpha, int variacion, uint kdeKnninit, uint alpha) { //si varioAlpha es false es porque estoy variando el kdeKnn
-    vector<unsigned long>* tiempo;
+    //vector<unsigned long>* tiempo;
     int i;
     if(varioAlpha){
 		i=alpha;
@@ -638,22 +638,20 @@ void escribirTiempos(string nombreArchivo, vector<vector<unsigned long> > &tiemp
 	}
     for (vector<vector<unsigned long> >::iterator it = tiempos.begin() ; it != tiempos.end(); ++it) {
         vector<unsigned long>& tiempo = *it;
-	ofstream salida;
-	string valor_parametro = int2stringConCantidadDigitos(4, i);
-	if (conPCA){
-		if(varioAlpha){
-        		salida = getFlujo(nombreArchivo + "K_" + to_string(kdeKnninit) + "Alpha_" + valor_parametro);
-		} else{
-			salida = getFlujo(nombreArchivo + "Alpha_" + to_string(alpha) + "K_" + valor_parametro);
-		}
-	} else{
-		salida = getFlujo(nombreArchivo + "K_" + valor_parametro);
-	}
-
-        for (vector<unsigned long>::iterator it = tiempo.begin() ; it != tiempo.end(); ++it) {
-            salida << *it << endl;
+        ofstream salida;
+        string valor_parametro = int2stringConCantidadDigitos(4, i);
+        if (conPCA){
+            if(varioAlpha){
+                salida = getFlujo(nombreArchivo + "K_" + to_string(kdeKnninit) + "Alpha_" + valor_parametro);
+            } else{
+                salida = getFlujo(nombreArchivo + "Alpha_" + to_string(alpha) + "K_" + valor_parametro);
+            }
+        } else{
+            salida = getFlujo(nombreArchivo + "K_" + valor_parametro);
         }
-
+        for (vector<unsigned long>::iterator it2 = tiempo.begin() ; it2 != tiempo.end(); ++it2) {
+            salida << *it2 << endl;
+        }
         salida.close();
         i+=variacion; //le sumo lo que fui variando
     }
@@ -1022,38 +1020,43 @@ void medirTiempos (const vector<vector<double> >& trainX, const vector<clase_t>&
 	}
 	if(conPCA){
 		if(varioAlpha){
-			vector<vector<unsigned long> > vectorTiemposYAlpha (17);
-			for(uint y = 1; y <= alpha; y+=20){
+			vector<vector<unsigned long> > vectorTiemposYAlpha (15);
+            vector<vector<double>> V = PCATecho(trainXTemp,alpha);
+			while(alpha > 21){      //for(uint y = alpha; y > 21; y-=20){
+			    for(uint j = 0; j < V.size(); ++j)  //Me quedo con las 1°s alpha columnas, que son los autovectores más importantes
+			        V[j].erase(V[j].begin()+alpha, V[j].end());
+                vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
+                vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
 				for (int i = 0; i < 20; i++) {
-				unsigned long start, end;
-				unsigned long delta = 0;
-				RDTSC_START(start);
-				vector<vector<double>> V = PCATecho(trainXTemp,y);
-				vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
-				vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
-				vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,kdeKnn);
-				RDTSC_STOP(end);
-				delta = end - start;//cada delta es el tiempo que tarda en calcular el PCA+ aplicar el cambio de base + calcular el knn para todos los elementos de testY
-				vectorTiemposYAlpha[(y-1)/20].push_back(delta);
+                    unsigned long start, end;
+                    unsigned long delta = 0;
+                    RDTSC_START(start);
+                    vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,kdeKnn);
+                    RDTSC_STOP(end);
+                    delta = end - start;//cada delta es el tiempo que tarda en calcular el PCA+ aplicar el cambio de base + calcular el knn para todos los elementos de testY
+                    vectorTiemposYAlpha[((alpha-1)/20)-2].push_back(delta);
 				}
+				alpha -= 20;
 			}
-			escribirTiempos("./Resultados/TiemposVariandoAlpha"+to_string(kdeKnn)+"/TiemposVariandoAlpha", vectorTiemposYAlpha,true,true,20,kdeKnn,1);
+			escribirTiempos("./Resultados/TiemposVariandoAlpha"+to_string(kdeKnn)+"/TiemposVariandoAlpha", vectorTiemposYAlpha,true,true,20,kdeKnn,41);
 
 
 			vector<vector<unsigned long> > vectorTiemposYAlphaFina (21);
-			for(uint y = 1; y <= 21; ++y){
+			while(alpha > 0){        //for(uint y = 1; y <= 21; ++y){
+                for(uint j = 0; j < V.size(); ++j)  //Me quedo con las 1°s alpha columnas, que son los autovectores más importantes
+                    V[j].erase(V[j].begin()+alpha, V[j].end());
+                vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
+                vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
 				for (int i = 0; i < 20; i++) {
-				unsigned long start, end;
-				unsigned long delta = 0;
-				RDTSC_START(start);
-				vector<vector<double>> V = PCATecho(trainXTemp,y);
-				vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
-				vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
-				vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,kdeKnn);
-				RDTSC_STOP(end);
-				delta = end - start;//cada delta es el tiempo que tarda en calcular el PCA+ aplicar el cambio de base + calcular el knn para todos los elementos de testY
-				vectorTiemposYAlphaFina[y-1].push_back(delta);
+                    unsigned long start, end;
+                    unsigned long delta = 0;
+                    RDTSC_START(start);
+                    vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,kdeKnn);
+                    RDTSC_STOP(end);
+                    delta = end - start;//cada delta es el tiempo que tarda en calcular el PCA+ aplicar el cambio de base + calcular el knn para todos los elementos de testY
+                    vectorTiemposYAlphaFina[alpha-1].push_back(delta);
 				}
+				--alpha;
 			}
 			escribirTiempos("./Resultados/TiemposVariandoAlphaFina"+to_string(kdeKnn)+"/TiemposVariandoAlphaFina", vectorTiemposYAlphaFina,true,true,1,kdeKnn,1);
 
@@ -1158,8 +1161,11 @@ int main(int argc, char * argv[]) {
         //------- cargamos los datos de uno de los tests en la funcion cargarTest esta la explicacion de que hace-------------------//
 
 		//cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
-		//medirTiempos(*dataSetTest,*labelsTest,5,10,10,true,true);
-		vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSetTest,*labelsTest,5,328,321,false,true); //el primer bool es si uso PCA o no, el segundo bool es si vario el k o el alpha, si el primero es false no importa lo que diga el segundo
+		medirTiempos(*dataSetTest,*labelsTest,5,1,321,true,true);
+		medirTiempos(*dataSetTest,*labelsTest,5,20,321,true,true);
+		medirTiempos(*dataSetTest,*labelsTest,5,40,321,true,true);
+		medirTiempos(*dataSetTest,*labelsTest,5,100,321,true,true);
+		//vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSetTest,*labelsTest,5,328,321,false,true); //el primer bool es si uso PCA o no, el segundo bool es si vario el k o el alpha, si el primero es false no importa lo que diga el segundo
 		//primer int es el k de kfold, el segundo int es el k de knn, el 3er int es el alpha
 
 
