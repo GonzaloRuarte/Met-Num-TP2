@@ -1138,7 +1138,74 @@ void medirTiempos (const vector<vector<double> >& trainX, const vector<clase_t>&
 
 }
 
+vector<vector< vector<uint> > > kfoldmatConf(const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, uint k){
+		uint imagenesPorPersona = 0;
+	int imagenesPPparagenerador = 0;
+	uint cantidadDeClases = 0;
+	uint personasTemp = 0;
+	for( uint i = 0; i < labelsX.size(); i++){
+		if (labelsX[i] != personasTemp){
+			personasTemp = labelsX[i];
+			cantidadDeClases++;
+		}
+		if(personasTemp == 1){
+			imagenesPorPersona++;
+			imagenesPPparagenerador++;
+		}
+	}
+//***********************************************************************//
+	uint n = trainX.size()/imagenesPorPersona;
+	vector<int> folds(imagenesPorPersona);
+	for(uint i = 0; i < imagenesPorPersona; ++i){
+        	folds[i] = i;
+	}
+    	vector< vector<int>> foldsXpersona (n);
+	mt19937 g(static_cast<uint32_t>(time(0)));
+	for (uint i = 0; i<n;++i){
+		shuffle(folds.begin(), folds.end(),g);
+		foldsXpersona[i] = folds;
+	}
+	vector<vector< vector<uint> > > matrices (0);
+	for(uint i = 0; i<k; i++){ //itero sobre la cantidad de folds
+		vector<vector<double> > trainXTemp;
+		vector<vector<double> > testYTemp;
+		vector<uint> labelsXTemp;
+		vector<uint> labelsYTemp;
+		for (uint j = 0; j < n; j++){ //itero sobre la cantidad de personas
+			for (uint u = 0; u < imagenesPorPersona; u++) {//itero sobre la cantidad de imagenes por persona
+				uint temp = (j*imagenesPorPersona)+foldsXpersona[j][u];
+				if (u >= i*imagenesPorPersona/k && u < (i+1)*imagenesPorPersona/k){ //si estoy en el fold que quiero
+					testYTemp.push_back(trainX[temp]);
+					labelsYTemp.push_back(labelsX[temp]); //agrego el elemento a test
+				} else{ 
+					trainXTemp.push_back(trainX[temp]);
+					labelsXTemp.push_back(labelsX[temp]); //agrego el elemento a train
+				}
 
+			}
+		}
+		vector<vector<double>> V = PCATecho(trainXTemp,31); 
+		vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
+		vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
+		vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,1);
+		
+//**********************Codigo para la matriz de confusion **************//
+		uint vector_size = vectordeKnns.size();
+		vector< vector<uint> > matrizConfusion (cantidadDeClases, vector<uint> (cantidadDeClases,0));
+		for (uint elem = 0; elem < vector_size; ++elem){
+				++matrizConfusion[labelsYTemp[elem]-1][vectordeKnns[elem]-1]; //el -1 es porque las clases van de 1 a 10 y aca la matriz se indexa de 0 a 9
+//la idea es, indexo a la fila segun la clase del elemento, y luego indexo a la columna segun lo que devolvio el knn
+//una columna sumada contiene la cantidad de veces que el knn eligio esa clase como resultado
+//idealmente la diagonal es la que va a tener numeros mas grandes
+//al mirar una fila i vemos que devolvio el knn para la clase i+1
+//al mirar una columna j vemos a que clase pertenecia lo que el knn determino que era de la clase j+1
+		}
+//**********************Codigo para la matriz de confusion END**************// //Usar cuando ya tengamos parametros elegidos
+		matrices.push_back(matrizConfusion);
+	}			
+	return matrices;		
+
+}
 
 
 
@@ -1162,11 +1229,14 @@ int main(int argc, char * argv[]) {
         cargarTest("./tests/testFullBig", dataSetTest, labelsTest, autovaloresTest);
         //------- cargamos los datos de uno de los tests en la funcion cargarTest esta la explicacion de que hace-------------------//
 
+		vector<vector< vector<uint> > > MatricesConfusion = kfoldmatConf(*dataSetTest,*labelsTest,5);
+
+
 		//cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
-		medirTiempos(*dataSetTest,*labelsTest,5,1,321,true,true);
-		medirTiempos(*dataSetTest,*labelsTest,5,20,321,true,true);
-		medirTiempos(*dataSetTest,*labelsTest,5,40,321,true,true);
-		medirTiempos(*dataSetTest,*labelsTest,5,100,321,true,true);
+		//medirTiempos(*dataSetTest,*labelsTest,5,1,321,true,true);
+		//medirTiempos(*dataSetTest,*labelsTest,5,20,321,true,true);
+		//medirTiempos(*dataSetTest,*labelsTest,5,40,321,true,true);
+		//medirTiempos(*dataSetTest,*labelsTest,5,100,321,true,true);
 		//vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSetTest,*labelsTest,5,328,321,false,true); //el primer bool es si uso PCA o no, el segundo bool es si vario el k o el alpha, si el primero es false no importa lo que diga el segundo
 		//primer int es el k de kfold, el segundo int es el k de knn, el 3er int es el alpha
 
