@@ -1225,6 +1225,122 @@ vector<vector< vector<uint> > > kfoldmatConf(const vector<vector<double> >& trai
 
 
 
+void escribirDatosTamMatriz(string nombreArchivo, vector<pair<vector<resultados >,double> > &estadisticas, uint kDekfold, int variacion) {
+vector<resultados>* estadistica;
+    int i = 328;
+    for (vector<pair<vector<resultados >,double> >::iterator it = estadisticas.begin() ; it != estadisticas.end(); ++it) {
+        vector<resultados >& estadistica = it->first;
+        string accuracy = to_string(it->second);
+	ofstream salida;
+	string valor_parametro = int2stringConCantidadDigitos(4, i);
+	salida = getFlujo(nombreArchivo + "Tamaño_" + valor_parametro);
+        string precision = "";
+        string recall = "";
+        string f1="";
+        for (vector<resultados>::iterator it = estadistica.begin() ; it != estadistica.end(); ++it) {
+            precision += to_string(it->precision) + "\t";
+            recall += to_string(it->recall) + "\t";
+            f1 += to_string(it->f1) + "\t";
+        }
+        salida << accuracy << endl;
+        salida << precision << endl;
+        salida << recall << endl;
+        salida << f1 << endl;
+        //cout << precision << endl;
+        salida.close();
+	i-=variacion; //le resto lo que fui variando el alpha
+
+    }
+
+
+}
+
+void kfoldTamDataset(const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, uint k){
+		uint imagenesPorPersona = 0;
+	int imagenesPPparagenerador = 0;
+	uint cantidadDeClases = 0;
+	uint personasTemp = 0;
+	for( uint i = 0; i < labelsX.size(); i++){
+		if (labelsX[i] != personasTemp){
+			personasTemp = labelsX[i];
+			cantidadDeClases++;
+		}
+		if(personasTemp == 1){
+			imagenesPorPersona++;
+			imagenesPPparagenerador++;
+		}
+	}
+//***********************************************************************//
+	uint n = trainX.size()/imagenesPorPersona;
+	vector<int> folds(imagenesPorPersona);
+	for(uint i = 0; i < imagenesPorPersona; ++i){
+        	folds[i] = i;
+	}
+    	vector< vector<int>> foldsXpersona (n);
+	mt19937 g(static_cast<uint32_t>(time(0)));
+	for (uint i = 0; i<n;++i){
+		shuffle(folds.begin(), folds.end(),g);
+		foldsXpersona[i] = folds;
+	}
+	for(uint i = 0; i<k; i++){ //itero sobre la cantidad de folds
+		vector<vector<double> > trainXTemp;
+		vector<vector<double> > testYTemp;
+		vector<uint> labelsXTemp;
+		vector<uint> labelsYTemp;
+		for (uint j = 0; j < n; j++){ //itero sobre la cantidad de personas
+			for (uint u = 0; u < imagenesPorPersona; u++) {//itero sobre la cantidad de imagenes por persona
+				uint temp = (j*imagenesPorPersona)+foldsXpersona[j][u];
+				if (u >= i*imagenesPorPersona/k && u < (i+1)*imagenesPorPersona/k){ //si estoy en el fold que quiero
+					testYTemp.push_back(trainX[temp]);
+					labelsYTemp.push_back(labelsX[temp]); //agrego el elemento a test
+				} else{ 
+					trainXTemp.push_back(trainX[temp]);
+					labelsXTemp.push_back(labelsX[temp]); //agrego el elemento a train
+				}
+
+			}
+		}
+		vector<pair<vector<resultados >,double> > resVariandoDatasetUnFold;
+//*********************Codigo para achicar data set de training ***************//
+		uint imagenesPorPersonaEnFold = (k-1)*imagenesPorPersona/k;
+		for (uint j = 0; j < 8; ++j){//itero sobre la cantidad de imagenes por persona en el fold inicial, la idea es dejar siempre las muestras balanceadas, pero al final tener una de cada uno
+
+			vector<vector<double>> V = PCATecho(trainXTemp,31); 
+			vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
+			vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
+			vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,1);
+			vector<resultados > resultadosTemp (0);
+			for (uint j = 1; j <= cantidadDeClases; j++){ //itero sobre las clases
+				resultados resXClase;
+				resXClase.precision = precision(labelsYTemp,j,vectordeKnns);
+				resXClase.recall = recall(labelsYTemp,j,vectordeKnns);
+				if (resXClase.precision+resXClase.recall > 0){
+					resXClase.f1 = 2.0*resXClase.precision*resXClase.recall/(resXClase.precision+resXClase.recall);
+				}
+				else {
+						resXClase.f1 = 0;
+				}
+				resXClase.clase = j;
+				resultadosTemp.push_back(resXClase);
+			}
+
+			double accuracyTemp = accuracy(labelsYTemp,vectordeKnns);
+			resVariandoDatasetUnFold.push_back(make_pair(resultadosTemp,accuracyTemp));
+			for (uint u = 0; u < n; ++u){//itero sobre la cantidad de personas
+				trainXTemp.erase(trainXTemp.begin()+((n-1-u)*imagenesPorPersonaEnFold)); //borro la ultima imagen de cada uno en cada paso
+				labelsXTemp.erase(labelsXTemp.begin()+((n-1-u)*imagenesPorPersonaEnFold));
+			}
+			--imagenesPorPersonaEnFold;
+
+		}
+//*********************Codigo para achicar data set de training END***************//
+		escribirDatosTamMatriz("./Resultados/ResultadosVariandoTamDataset/ResultadosVariandoTamDataset", resVariandoDatasetUnFold,i,41);//41 es la variacion del tamaño del dataset	
+
+	}				
+
+}
+
+
 int main(int argc, char * argv[]) {
     string metodo, trainSet, testSet, classif;
 /*    salida.open("Comparación_de_algoritmos.txt", ios_base::app);
@@ -1245,8 +1361,8 @@ int main(int argc, char * argv[]) {
         cargarTest("./tests/testFullBig", dataSetTest, labelsTest, autovaloresTest);
         //------- cargamos los datos de uno de los tests en la funcion cargarTest esta la explicacion de que hace-------------------//
 
-		vector<vector< vector<uint> > > MatricesConfusion = kfoldmatConf(*dataSetTest,*labelsTest,5);
-
+		//vector<vector< vector<uint> > > MatricesConfusion = kfoldmatConf(*dataSetTest,*labelsTest,5);
+		kfoldTamDataset(*dataSetTest,*labelsTest,5);
 
 		//cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
 		//medirTiempos(*dataSetTest,*labelsTest,5,1,321,true,true);
