@@ -234,6 +234,66 @@ void cargarTest(string nombreArchivo, vector<vector<double>> *dataSet, vector<ui
 
 }
 
+/*
+ * nombreArchivo:   el nombre del archivo
+ * dataSet:         la matriz que contendra las imagenes de entrada.
+ * labels:          los labels de las imagenes cargadas en dataSet.
+ * */
+void cargarSet(string nombreArchivo, vector<vector<double>> *dataSet, vector<uint> *labels) {
+    fstream entrada(nombreArchivo, ios_base::in);
+
+    vector<string>* listaImagenes = new vector<string>(0);
+
+    string lectura;
+    bool path = true;
+    while(entrada >> lectura) {
+        lectura = explode(lectura, ',').at(0);
+        if (path) {
+            listaImagenes->push_back("./" + lectura);
+            path = false;
+        } else {
+            labels->push_back(stoi(lectura));
+            path = true;
+        }
+    }
+    entrada.close();
+
+    int tamanoDeReferencia = getTamanoImagenes(listaImagenes->at(0), &ancho, &alto);
+    cargarDataSet(*listaImagenes, tamanoDeReferencia, dataSet);
+}
+
+/*
+ * nombreArchivo:   el nombre del archivo
+ * dataSet:         la matriz que contendra las imagenes de entrada.
+ * labels:          los labels de las imagenes cargadas en dataSet.
+ * */
+void cargarSet(string nombreArchivo, vector<vector<double>> *dataSet) {
+    fstream entrada(nombreArchivo, ios_base::in);
+
+    vector<string>* listaImagenes = new vector<string>(0);
+
+    string lectura;
+    while(entrada >> lectura) {
+        listaImagenes->push_back("./" + lectura);
+    }
+    entrada.close();
+
+    int tamanoDeReferencia = getTamanoImagenes(listaImagenes->at(0), &ancho, &alto);
+    cargarDataSet(*listaImagenes, tamanoDeReferencia, dataSet);
+}
+
+void guardarClasificacion(string nombreArchivo, vector<uint> &clasificacion) {
+    ofstream salida(nombreArchivo, ios_base::out);
+    for (vector<uint>::iterator it = clasificacion.begin() ; it != clasificacion.end(); ++it) {
+        uint clase = *it;
+        string clase_str = "";
+        clase_str += to_string(*it) + "\t";
+        //cout << fila_str << endl;
+        salida << clase_str << endl;
+    }
+    salida.close();
+}
+
 bool existeArchivo(const string& nombreArchivo) {
     struct stat buf;
     bool ret = false;

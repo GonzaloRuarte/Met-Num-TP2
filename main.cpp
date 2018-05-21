@@ -1342,16 +1342,42 @@ void kfoldTamDataset(const vector<vector<double> >& trainX, const vector<clase_t
 
 
 int main(int argc, char * argv[]) {
-    string metodo, trainSet, testSet, classif;
 /*    salida.open("Comparación_de_algoritmos.txt", ios_base::app);
     salida << "Rendimiento relativo, algor.1/algor.2" << endl;
     salida.close();*/
 
-/*    if (!obtenerParametros(argc, argv, &metodo, &trainSet, &testSet, &classif)) {
+/*    string metodo, nombreTrainSet, nombreTestSet, nombreClassif;
+    int kdeKnn = 1;
+    int alpha = 31;
+
+    if (!obtenerParametros(argc, argv, &metodo, &nombreTrainSet, &nombreTestSet, &nombreClassif)) {
         cout << "Modo de uso: tp2 -m <method> -i <train_set> -q <test_set> -o <classif>\n";
-    } else {*/
-		/*vector<vector<double>>* dataSet = new vector<vector<double> >;
-		vector<uint>* labelsX = new vector<uint >;*/
+    } else {
+        vector<vector<double>> *trainSet;
+        vector<uint> *labelsTrainSet;
+        vector<vector<double>> *testSet;
+        vector<uint> *labelsTestSet;
+        vector<uint> clasificacion;
+
+        cargarSet(nombreTrainSet, trainSet, labelsTrainSet);
+        cargarSet(nombreTestSet,  testSet);
+
+        int met = stoi(metodo);
+
+        switch(met) {
+            case 0: // kNN
+                clasificacion = vectorDeKnns(*trainSet, *labelsTrainSet, *testSet, kdeKnn);
+                break;
+            case 1: // PCA + kNN
+                vector<vector<double>> V = PCATecho(*trainSet, alpha);
+                vector<vector<double> > trainSetTemp = multMat(*trainSet, V);
+                vector<vector<double> > testSetTemp = multMat(*testSet, V);
+                clasificacion = vectorDeKnns(trainSetTemp, *labelsTrainSet, testSetTemp, kdeKnn);
+                break;
+                //default:
+        }
+        guardarClasificacion(nombreClassif, clasificacion);
+    }*/
 
 
 		//------- cargamos los datos de uno de los tests en la funcion cargarTest esta la explicacion de que hace-------------------//
