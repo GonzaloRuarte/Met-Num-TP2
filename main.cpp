@@ -1140,7 +1140,7 @@ void medirTiempos (const vector<vector<double> >& trainX, const vector<clase_t>&
 
 void escribirTiemposDataset(string nombreArchivo, vector<vector<unsigned long> > &tiempos, int variacion) { //si varioAlpha es false es porque estoy variando el kdeKnn
     //vector<unsigned long>* tiempo;
-    int i = variacion;
+    int i = 328;
 
     for (vector<vector<unsigned long> >::iterator it = tiempos.begin() ; it != tiempos.end(); ++it) {
         vector<unsigned long>& tiempo = *it;
@@ -1151,7 +1151,7 @@ void escribirTiemposDataset(string nombreArchivo, vector<vector<unsigned long> >
             salida << *it2 << endl;
         }
         salida.close();
-        i+=variacion; //le sumo lo que fui variando
+        i-=variacion; //le sumo lo que fui variando
     }
 
 
