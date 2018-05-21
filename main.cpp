@@ -1138,6 +1138,100 @@ void medirTiempos (const vector<vector<double> >& trainX, const vector<clase_t>&
 
 }
 
+void escribirTiemposDataset(string nombreArchivo, vector<vector<unsigned long> > &tiempos, int variacion) { //si varioAlpha es false es porque estoy variando el kdeKnn
+    //vector<unsigned long>* tiempo;
+    int i = variacion;
+
+    for (vector<vector<unsigned long> >::iterator it = tiempos.begin() ; it != tiempos.end(); ++it) {
+        vector<unsigned long>& tiempo = *it;
+        ofstream salida;
+        string valor_parametro = int2stringConCantidadDigitos(4, i);
+	salida = getFlujo(nombreArchivo + "TamDataset_" + valor_parametro);
+        for (vector<unsigned long>::iterator it2 = tiempo.begin() ; it2 != tiempo.end(); ++it2) {
+            salida << *it2 << endl;
+        }
+        salida.close();
+        i+=variacion; //le sumo lo que fui variando
+    }
+
+
+}
+
+void medirTiemposDataset (const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, uint k) {
+	//codigo para calcular la cantidad de imagenes por persona suponiendo que las muestras son balanceadas y la cantidad de clases
+	uint imagenesPorPersona = 0;
+	uint cantidadDeClases = 0;
+	uint personasTemp = 0;
+	for( uint i = 0; i < labelsX.size(); i++){
+		if (labelsX[i] != personasTemp){
+			personasTemp = labelsX[i];
+			cantidadDeClases++;
+		}
+		if(personasTemp == 1){
+			imagenesPorPersona++;
+		}
+	}
+//***********************************************************************//
+	uint n = trainX.size()/imagenesPorPersona; //n es la cantidad de personas
+	vector<int> folds(imagenesPorPersona);
+	for(uint i = 0; i < imagenesPorPersona; ++i){
+        	folds[i] = i;
+	}
+	vector<vector<double> > trainXTemp;
+	vector<vector<double> > testYTemp;
+	vector<uint> labelsXTemp;
+	vector<uint> labelsYTemp;
+	for (uint j = 0; j < n; j++){ //itero sobre la cantidad de personas
+		for (uint u = 0; u < imagenesPorPersona; u++) {//itero sobre la cantidad de imagenes por persona
+			uint temp = (j*imagenesPorPersona)+u;
+			if (u < imagenesPorPersona/k){ //si estoy en el fold que quiero
+				testYTemp.push_back(trainX[temp]);
+				labelsYTemp.push_back(labelsX[temp]); //agrego el elemento a test
+			} else{ 
+				trainXTemp.push_back(trainX[temp]);
+				labelsXTemp.push_back(labelsX[temp]); //agrego el elemento a train
+			}
+
+		}
+	}
+			
+//*********************Codigo para achicar data set de training ***************//
+		uint imagenesPorPersonaEnFold = (k-1)*imagenesPorPersona/k;
+		uint imagenesPorPersonaEnFoldInit = imagenesPorPersonaEnFold;
+		vector<vector<unsigned long> > vectorTiemposYDataset (imagenesPorPersonaEnFoldInit);
+		for (uint j = 0; j < imagenesPorPersonaEnFoldInit; ++j){//itero sobre la cantidad de imagenes por persona en el fold inicial, la idea es dejar siempre las muestras balanceadas, pero al final tener una de cada uno
+
+			vector<vector<double>> V = PCATecho(trainXTemp,31); 
+			vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
+			vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
+			for (int i = 0; i < 20; i++) {
+				unsigned long start, end;
+				unsigned long delta = 0;
+				RDTSC_START(start);
+				vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,1);
+				RDTSC_STOP(end);
+				delta = end - start;//cada delta es el tiempo que tarda en calcular el PCA+ aplicar el cambio de base + calcular el knn para todos los elementos de testY
+				vectorTiemposYDataset[imagenesPorPersonaEnFoldInit-1-j].push_back(delta);
+			}
+
+			for (uint u = 0; u < n; ++u){//itero sobre la cantidad de personas
+				trainXTemp.erase(trainXTemp.begin()+((n-1-u)*imagenesPorPersonaEnFold)); //borro la ultima imagen de cada uno en cada paso
+				labelsXTemp.erase(labelsXTemp.begin()+((n-1-u)*imagenesPorPersonaEnFold));
+			}
+			--imagenesPorPersonaEnFold;
+
+		}
+//*********************Codigo para achicar data set de training END***************//
+		escribirTiemposDataset("./Resultados/TiemposVariandoTamDataset/TiemposVariandoTamDataset", vectorTiemposYDataset,n);
+
+
+}
+
+
+
+
+
+
 void escribirMatrizDeConfusion(string nombreArchivo, vector< vector<uint> > &matrizConfusion) {
 	ofstream salida(nombreArchivo, ios_base::out);//getFlujo(nombreArchivo);
 	for (vector< vector<uint> >::iterator it = matrizConfusion.begin() ; it != matrizConfusion.end(); ++it) {
@@ -1303,7 +1397,8 @@ void kfoldTamDataset(const vector<vector<double> >& trainX, const vector<clase_t
 		vector<pair<vector<resultados >,double> > resVariandoDatasetUnFold;
 //*********************Codigo para achicar data set de training ***************//
 		uint imagenesPorPersonaEnFold = (k-1)*imagenesPorPersona/k;
-		for (uint j = 0; j < 8; ++j){//itero sobre la cantidad de imagenes por persona en el fold inicial, la idea es dejar siempre las muestras balanceadas, pero al final tener una de cada uno
+		uint imagenesPorPersonaEnFoldInit = imagenesPorPersonaEnFold;
+		for (uint j = 0; j < imagenesPorPersonaEnFoldInit; ++j){//itero sobre la cantidad de imagenes por persona en el fold inicial, la idea es dejar siempre las muestras balanceadas, pero al final tener una de cada uno
 
 			vector<vector<double>> V = PCATecho(trainXTemp,31); 
 			vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
@@ -1334,7 +1429,7 @@ void kfoldTamDataset(const vector<vector<double> >& trainX, const vector<clase_t
 
 		}
 //*********************Codigo para achicar data set de training END***************//
-		escribirDatosTamMatriz("./Resultados/ResultadosVariandoTamDataset/ResultadosVariandoTamDataset", resVariandoDatasetUnFold,i,41);//41 es la variacion del tamaño del dataset	
+		escribirDatosTamMatriz("./Resultados/ResultadosVariandoTamDataset/ResultadosVariandoTamDataset", resVariandoDatasetUnFold,i,n);//41 es la variacion del tamaño del dataset	
 
 	}				
 
@@ -1388,8 +1483,8 @@ int main(int argc, char * argv[]) {
         //------- cargamos los datos de uno de los tests en la funcion cargarTest esta la explicacion de que hace-------------------//
 
 		//vector<vector< vector<uint> > > MatricesConfusion = kfoldmatConf(*dataSetTest,*labelsTest,5);
-		kfoldTamDataset(*dataSetTest,*labelsTest,5);
-
+		//kfoldTamDataset(*dataSetTest,*labelsTest,5);
+		medirTiemposDataset(*dataSetTest,*labelsTest,5);
 		//cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
 		//medirTiempos(*dataSetTest,*labelsTest,5,1,321,true,true);
 		//medirTiempos(*dataSetTest,*labelsTest,5,20,321,true,true);
