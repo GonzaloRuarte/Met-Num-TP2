@@ -1138,6 +1138,21 @@ void medirTiempos (const vector<vector<double> >& trainX, const vector<clase_t>&
 
 }
 
+void escribirMatrizDeConfusion(string nombreArchivo, vector< vector<uint> > &matrizConfusion) {
+	ofstream salida(nombreArchivo, ios_base::out);//getFlujo(nombreArchivo);
+	for (vector< vector<uint> >::iterator it = matrizConfusion.begin() ; it != matrizConfusion.end(); ++it) {
+		vector<uint>& fila = *it;
+		string fila_str = "";
+		for (vector<uint>::iterator it = fila.begin() ; it != fila.end(); ++it) {
+			fila_str += to_string(*it) + "\t";
+		}
+		//cout << fila_str << endl;
+		salida << fila_str << endl;
+	}
+	salida.close();
+}
+
+
 vector<vector< vector<uint> > > kfoldmatConf(const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, uint k){
 		uint imagenesPorPersona = 0;
 	int imagenesPPparagenerador = 0;
@@ -1200,6 +1215,7 @@ vector<vector< vector<uint> > > kfoldmatConf(const vector<vector<double> >& trai
 //al mirar una fila i vemos que devolvio el knn para la clase i+1
 //al mirar una columna j vemos a que clase pertenecia lo que el knn determino que era de la clase j+1
 		}
+
 //**********************Codigo para la matriz de confusion END**************// //Usar cuando ya tengamos parametros elegidos
 		matrices.push_back(matrizConfusion);
 	}			
