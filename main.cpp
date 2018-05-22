@@ -1448,10 +1448,10 @@ int main(int argc, char * argv[]) {
     if (!obtenerParametros(argc, argv, &metodo, &nombreTrainSet, &nombreTestSet, &nombreClassif)) {
         cout << "Modo de uso: tp2 -m <method> -i <train_set> -q <test_set> -o <classif>\n";
     } else {
-        vector<vector<double>> *trainSet;
-        vector<uint> *labelsTrainSet;
-        vector<vector<double>> *testSet;
-        vector<uint> *labelsTestSet;
+        vector<vector<double>> *trainSet = new vector<vector<double>>;
+        vector<uint> *labelsTrainSet = new vector<uint>;
+        vector<vector<double>> *testSet = new vector<vector<double>>;
+        vector<uint> *labelsTestSet = new vector<uint>;
         vector<uint> clasificacion;
 
         cargarSet(nombreTrainSet, trainSet, labelsTrainSet);
@@ -1472,7 +1472,9 @@ int main(int argc, char * argv[]) {
                 //default:
         }
         guardarClasificacion(nombreClassif, clasificacion);
-    }*/
+    }
+*/
+
 
 
 		//------- cargamos los datos de uno de los tests en la funcion cargarTest esta la explicacion de que hace-------------------//
