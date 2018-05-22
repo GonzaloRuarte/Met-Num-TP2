@@ -177,11 +177,12 @@ bool contiene(char *argv[], const string *cadena) {
 
 string obtener(char *argv[], const string *cadena) {
     string ret;
-    string param1 = argv[1], param2 = argv[3], param3 = argv[5], param4 = argv[5];
-    if (param1.compare(*cadena)) ret = argv[2];
-    if (param2.compare(*cadena)) ret = argv[4];
-    if (param3.compare(*cadena)) ret = argv[6];
-    if (param4.compare(*cadena)) ret = argv[7];
+    string param1 = argv[1], param2 = argv[3], param3 = argv[5], param4 = argv[7];
+
+    if (param1.compare(*cadena) == 0) ret = argv[2];
+    if (param2.compare(*cadena) == 0) ret = argv[4];
+    if (param3.compare(*cadena) == 0) ret = argv[6];
+    if (param4.compare(*cadena) == 0) ret = argv[8];
     return ret;
 }
 
