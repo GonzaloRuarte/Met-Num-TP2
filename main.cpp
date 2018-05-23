@@ -1054,7 +1054,7 @@ void kFoldDark (const vector<vector<double> >& trainX, const vector<clase_t>& la
 //si usas esta funcion el nombre de los archivos va a ser cualquier cosa pero bue jaja
 		//de ultima hayque hacer otra funcion para que escriba bien el nombre de los archivos
 			
-		}
+		
 	}
 
 }
