@@ -17,4 +17,8 @@ ofstream getFlujo(const string& nombreArchivo);
 void cargarTest(string nombreArchivo, vector<vector<double>> *dataSet, vector<uint> *labels, vector<double> *autovalores);
 string int2stringConCantidadDigitos(int cantidadDigitos, int i);
 
+void cargarSet(string nombreArchivo, vector<vector<double>> *dataSet, vector<uint> *labels);
+void cargarSet(string nombreArchivo, vector<vector<double>> *dataSet);
+void guardarClasificacion(string nombreArchivo, vector<uint> &clasificacion);
+
 #endif //PPMLOADER_UTIL_H
