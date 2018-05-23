@@ -22,16 +22,22 @@ function [ vector_autoimagenes ] = Crear_n_Autoimagenes( tp2_folder, accuracy, n
     V = CalcularAutoValoresVectores(Mx,accuracy,n);
     matrix_height = size(Mx);
     matrix_height = matrix_height(1);
-    if(matrix_height==10304)
-        anchoim = 92;
-        altoim = 112;
-    elseif(matrix_height == 410) 
-        anchoim = 18;
-        altoim = 23;
-        V = wextend('ar','zpd',V,4,'d');
-    else
+    if(mx_chica_grande_o_grandetraspuesto == 0)
         anchoim = 23;
         altoim = 28;
+        
+    elseif(mx_chica_grande_o_grandetraspuesto == 1) 
+        anchoim = 92;
+        altoim = 112;
+    else
+        anchoim = 92;
+        altoim = 112;
+        imgs = double(importar_imagenes(tp2_folder));
+        Vm = VectorMedias(imgs);
+        X = MatrizSemivarianza(imgs, Vm);
+        Xt = X';
+        V = Xt * V;
+        V = normalizarVcolumnas(V);
     end
     vector_autoimagenes = zeros(altoim, anchoim, n);
     for i = 1:n
