@@ -1157,6 +1157,98 @@ void escribirTiemposDataset(string nombreArchivo, vector<vector<unsigned long> >
 
 }
 
+void escribirDistorted (string nombreArchivo, pair<vector<resultados >,double> &estadisticas) {
+
+        string accuracy = to_string(estadisticas.second);
+	ofstream salida;
+	salida = getFlujo(nombreArchivo + "Distorted");
+        string precision = "";
+        string recall = "";
+        string f1="";
+        for (vector<resultados>::iterator it = estadisticas.first.begin() ; it != estadisticas.first.end(); ++it) {
+            precision += to_string(it->precision) + "\t";
+            recall += to_string(it->recall) + "\t";
+            f1 += to_string(it->f1) + "\t";
+        }
+        salida << accuracy << endl;
+        salida << precision << endl;
+        salida << recall << endl;
+        salida << f1 << endl;
+        salida.close();
+}
+
+
+
+
+void testDistorted (const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, uint k) {
+	uint imagenesPorPersona = 0;
+	uint cantidadDeClases = 0;
+	uint personasTemp = 0;
+	for( uint i = 0; i < labelsX.size(); i++){
+		if (labelsX[i] != personasTemp){
+			personasTemp = labelsX[i];
+			cantidadDeClases++;
+		}
+		if(personasTemp == 1){
+			imagenesPorPersona++;
+		}
+	}
+//***********************************************************************//
+	uint n = trainX.size()/imagenesPorPersona; //n es la cantidad de personas
+	vector<int> folds(imagenesPorPersona);
+	for(uint i = 0; i < imagenesPorPersona; ++i){
+        	folds[i] = i;
+	}
+	vector<vector<double> > trainXTemp;
+	vector<vector<double> > testYTemp;
+	vector<uint> labelsXTemp;
+	vector<uint> labelsYTemp;
+	for (uint j = 0; j < n; j++){ //itero sobre la cantidad de personas
+		for (uint u = 0; u < imagenesPorPersona; u++) {//itero sobre la cantidad de imagenes por persona
+			uint temp = (j*imagenesPorPersona)+u;
+			if (u < imagenesPorPersona/k){ //si estoy en el fold que quiero
+				testYTemp.push_back(trainX[temp]);
+				labelsYTemp.push_back(labelsX[temp]); //agrego el elemento a test
+			} else{ 
+				trainXTemp.push_back(trainX[temp]);
+				labelsXTemp.push_back(labelsX[temp]); //agrego el elemento a train
+			}
+
+		}
+	}
+			
+		vector<vector<double>> V = PCATecho(trainXTemp,31); 
+		vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
+		vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
+		vector<resultados > resultadosTemp (0);
+		vector<uint> vectordeKnns = vectorDeKnns(trainXTemp,labelsXTemp,testYTemp,1);
+		for (uint j = 1; j <= cantidadDeClases; j++){ //itero sobre las clases
+			resultados resXClase;
+			resXClase.precision = precision(labelsYTemp,j,vectordeKnns);
+			resXClase.recall = recall(labelsYTemp,j,vectordeKnns);
+			if (resXClase.precision+resXClase.recall > 0){
+				resXClase.f1 = 2.0*resXClase.precision*resXClase.recall/(resXClase.precision+resXClase.recall);
+			}
+			else {
+				resXClase.f1 = 0;
+			}
+			resXClase.clase = j;
+			resultadosTemp.push_back(resXClase);
+		}
+
+		double accuracyTemp = accuracy(labelsYTemp,vectordeKnns);
+		pair<vector<resultados >,double> resDistorted = make_pair(resultadosTemp,accuracyTemp);
+
+
+		escribirDistorted("./Resultados/ResultadosDistorted/ResultadosDistorted", resDistorted);
+
+
+}
+
+
+
+
+
 void medirTiemposDataset (const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, uint k) {
 	//codigo para calcular la cantidad de imagenes por persona suponiendo que las muestras son balanceadas y la cantidad de clases
 	uint imagenesPorPersona = 0;
@@ -1484,21 +1576,8 @@ int main(int argc, char * argv[]) {
         cargarTest("./tests/testFullBig", dataSetTest, labelsTest, autovaloresTest);
         //------- cargamos los datos de uno de los tests en la funcion cargarTest esta la explicacion de que hace-------------------//
 
-		//vector<vector< vector<uint> > > MatricesConfusion = kfoldmatConf(*dataSetTest,*labelsTest,5);
-		//kfoldTamDataset(*dataSetTest,*labelsTest,5);
-		medirTiemposDataset(*dataSetTest,*labelsTest,5);
-		//cargarDataSetEnMatriz("./ImagenesCarasRed",dataSet, labelsX);
-		//medirTiempos(*dataSetTest,*labelsTest,5,1,321,true,true);
-		//medirTiempos(*dataSetTest,*labelsTest,5,20,321,true,true);
-		//medirTiempos(*dataSetTest,*labelsTest,5,40,321,true,true);
-		//medirTiempos(*dataSetTest,*labelsTest,5,100,321,true,true);
-		//vector<pair<vector<resultados >,double> > dasdsa = kFold(*dataSetTest,*labelsTest,5,328,321,false,true); //el primer bool es si uso PCA o no, el segundo bool es si vario el k o el alpha, si el primero es false no importa lo que diga el segundo
-		//primer int es el k de kfold, el segundo int es el k de knn, el 3er int es el alpha
+		testDistorted(*dataSetTest,*labelsTest,5);
 
-
-	//escribirEstadisiticas("./pruebaEstadisticas", dasdsa);
-		/*delete labelsX;
-		delete dataSet;*/
 		delete dataSetTest;
 		delete labelsTest;
 		delete autovaloresTest;
