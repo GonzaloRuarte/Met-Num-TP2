@@ -709,7 +709,7 @@ void escribirEstadisiticas(string nombreArchivo, vector<pair<vector<resultados >
 vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, uint k, uint kdeKnn, uint alpha, bool conPCA, bool varioAlpha) {
 //codigo para calcular la cantidad de imagenes por persona suponiendo que las muestras son balanceadas y la cantidad de clases
 	uint imagenesPorPersona = 0;
-	int imagenesPPparagenerador = 0;
+	//int imagenesPPparagenerador = 0;
 	uint cantidadDeClases = 0;
 	uint personasTemp = 0;
 	for( uint i = 0; i < labelsX.size(); i++){
@@ -719,7 +719,7 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 		}
 		if(personasTemp == 1){
 			imagenesPorPersona++;
-			imagenesPPparagenerador++;
+			//imagenesPPparagenerador++;
 		}
 	}
 //***********************************************************************//
