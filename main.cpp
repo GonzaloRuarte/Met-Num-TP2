@@ -1580,7 +1580,9 @@ vector<vector< vector<uint> > > kfoldmatConf(const vector<vector<double> >& trai
 		}
 		vector<vector<double>> V = PCATecho(trainXTemp,31); 
 		vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
-		vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
+		vector<vector<double> > testYTemp2 = testYTemp;
+		multMatEsc(testYTemp2,0.5);
+		testYTemp2 = multMat(testYTemp,V);
 		vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,1);
 		
 //**********************Codigo para la matriz de confusion **************//
@@ -1769,8 +1771,8 @@ int main(int argc, char * argv[]) {
         cargarTest("./tests/testFullBig", dataSetTest, labelsTest, autovaloresTest);
         //------- cargamos los datos de uno de los tests en la funcion cargarTest esta la explicacion de que hace-------------------//
 
-		kFoldDarkSat(*dataSetTest,*labelsTest,5);
-
+		vector<vector< vector<uint> > > matriz = kfoldmatConf(*dataSetTest,*labelsTest,5);
+		escribirMatrizDeConfusion("./MatrizConfusionDark",matriz)
 		delete dataSetTest;
 		delete labelsTest;
 		delete autovaloresTest;
