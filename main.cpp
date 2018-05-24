@@ -1120,11 +1120,11 @@ void kFoldDarkSat (const vector<vector<double> >& trainX, const vector<clase_t>&
 				for(uint y = 0; y <= 9; ++y) { //este for seria para variar lo que oscurece, primera iteracion lo dejo como esta y la ultima le resto 180 a todos
 					
 					vector<vector<double> > testYTemp2 = testYTemp;
-					for(uint o = 0; o < testYtemp2.size(); ++o){
-						for(uint h = 0; h < testYtemp2[0].size(); ++h){
-							testYtemp2[o][h]-=20*y;
-							if (testYtemp2[o][h]< 0){
-								testYtemp2[o][h]=0;
+					for(uint o = 0; o < testYTemp2.size(); ++o){
+						for(uint h = 0; h < testYTemp2[0].size(); ++h){
+							testYTemp2[o][h]-=20*y;
+							if (testYTemp2[o][h]< 0){
+								testYTemp2[o][h]=0;
 							}
 						}
 					}
