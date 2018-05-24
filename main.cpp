@@ -1771,8 +1771,14 @@ int main(int argc, char * argv[]) {
         cargarTest("./tests/testFullBig", dataSetTest, labelsTest, autovaloresTest);
         //------- cargamos los datos de uno de los tests en la funcion cargarTest esta la explicacion de que hace-------------------//
 
-		vector<vector< vector<uint> > > matriz = kfoldmatConf(*dataSetTest,*labelsTest,5);
-		escribirMatrizDeConfusion("./MatrizConfusionDark",matriz)
+		vector<vector< vector<uint> > > matrices = kfoldmatConf(*dataSetTest,*labelsTest,5);
+		vector< vector<uint> > matriz(matrices[0].size(), vector<uint>(matrices[0][0].size(),0));
+		for(int i = 0; i < matriz.size(); i++) {
+			for(int j = 0; i < matriz[0].size(); i++) {
+				matriz[i][j] = (matrices[0][i][j] + matrices[1][i][j] + matrices[2][i][j] + matrices[3][i][j] + matrices[4][i][j])/5;
+			}
+		}
+		escribirMatrizDeConfusion("./MatrizConfusionDark",matriz);
 		delete dataSetTest;
 		delete labelsTest;
 		delete autovaloresTest;
