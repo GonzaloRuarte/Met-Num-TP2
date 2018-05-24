@@ -1028,7 +1028,7 @@ void kFoldDark (const vector<vector<double> >& trainX, const vector<clase_t>& la
 					
 					vector<vector<double> > testYTemp2 = testYTemp;
 					multMatEsc(testYTemp2,y*0.10);
-					vector<vector<double> > testYTemp2 = multMat(testYTemp2,V);
+					testYTemp2 = multMat(testYTemp2,V);
 					vector<resultados > resultadosTemp (0);
 					vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,1);
 					for (uint j = 1; j <= cantidadDeClases; j++){ //itero sobre las clases
@@ -1128,7 +1128,7 @@ void kFoldDarkSat (const vector<vector<double> >& trainX, const vector<clase_t>&
 							}
 						}
 					}
-					vector<vector<double> > testYTemp2 = multMat(testYTemp2,V);
+					testYTemp2 = multMat(testYTemp2,V);
 					vector<resultados > resultadosTemp (0);
 					vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,1);
 					for (uint j = 1; j <= cantidadDeClases; j++){ //itero sobre las clases
