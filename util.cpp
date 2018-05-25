@@ -235,6 +235,25 @@ void cargarTest(string nombreArchivo, vector<vector<double>> *dataSet, vector<ui
 
 }
 
+void cargarTest_aleat(vector<vector<double>> *dataSet, bool repeticion){
+    vector<string> listaImagenes(200);
+    string lectura;
+    unsigned short int i = 0;
+    while(i < 100){
+        listaImagenes[i] = "./randn/" + to_string(i+1) + ".pgm";
+        ++i;
+    }
+    while(i < 200){
+        if(repeticion && (i%20 == 0 || i%20 == 1))
+            listaImagenes[i] = "./rands/" + to_string(1) + ".pgm";
+        else
+            listaImagenes[i] = "./rands/" + to_string((i-100)+1) + ".pgm";
+        ++i;
+    }
+    int tamanoDeReferencia = getTamanoImagenes(listaImagenes.at(0), &ancho, &alto);
+    cargarDataSet(listaImagenes, tamanoDeReferencia, dataSet);
+}
+
 /*
  * nombreArchivo:   el nombre del archivo
  * dataSet:         la matriz que contendra las imagenes de entrada.
