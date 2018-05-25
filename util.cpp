@@ -1,16 +1,4 @@
-#include <string>
-#include <iostream>
-#include <fstream>
-#include "ppmloader.h"
-#include "dirent.h"
-#include <vector>
-#include <stdio.h>
-#include <map>
-#include <sys/stat.h>
-#include <sstream>
-
 #include "util.h"
-
 
 using namespace std;
 
