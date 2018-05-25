@@ -8,6 +8,6 @@ main: main.cpp util.cpp mediciones.cpp clasificador.cpp ppmloader.cpp
 
 
 clean:
-	rm main
+	rm tp2
 	rm *.txt
 
