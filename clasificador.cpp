@@ -269,6 +269,49 @@ vector<vector<double> > generarV(const vector<vector<double> > &mat, uint alpha)
     return res;
 }
 
+vector<pair<double,clase_t> > vector_de_distancias(const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, const vector<double>& newImg){
+    vector<pair<double,clase_t> > vecNormas (trainX.size());
+    for (uint i = 0; i < labelsX.size(); i++) {
+        vecNormas[i].first  = norma2(restaVec(trainX[i],newImg));
+        vecNormas[i].second = labelsX[i];
+    }
+    return vecNormas;
+}
+
+clase_t Knn_sim (const vector<pair<double,clase_t> >& vecNormas, uint k){
+    vector<pair<double,clase_t> >::const_iterator primero = vecNormas.cbegin();
+    vector<pair<double,clase_t> >::const_iterator k_esimo = primero+k;
+    priority_queue<pair<double,clase_t> > heap(primero, k_esimo);  //Creo un max_heap con los primeros k elementos de vecNormas
+    for(size_t i = k; i < vecNormas.size(); ++i){
+        if(vecNormas[i] < heap.top()){  //Si el i-ésimo elemento es más chico que el más grande del heap...
+            heap.pop();                 //entonces saco al más grande...
+            heap.push(vecNormas[i]);    //y meto al i-ésimo elemento.
+        }                               //De esta forma me quedo con los k elementos más chicos.
+    }
+
+    map<clase_t, pair<uint, double> > candidatos;   //La 1° coordenada del significado cuenta la cantidad de apariciones.
+    while(!heap.empty()){                           //La 2° coordenada es la distancia más grande de todas las distancias que hay para una misma clase.
+        pair<clase_t, pair<uint, double> > clave_signif = make_pair(heap.top().second, make_pair(1, heap.top().first));
+        pair<map<clase_t, pair<uint, double> >::iterator, bool> it_bool = candidatos.insert(clave_signif);
+        if(not it_bool.second)  //Si la clase ya estaba en el map, debo únicamente sumar 1 a la cant. de apariciones.
+            ++it_bool.first->second.first;
+        heap.pop();
+    }   //Cada clase queda asociada a la 1° distancia con la que entró, que es la más grande.
+    auto it = candidatos.begin();
+    clase_t clase = it->first;
+    uint cant_apari = it->second.first;
+    double max_dist = it->second.second;
+    while (it != candidatos.end()){
+        if(cant_apari < it->second.first || (cant_apari == it->second.first && max_dist > it->second.second)){
+            clase = it->first;
+            cant_apari = it->second.first;
+            max_dist = it->second.second;
+        }
+        ++it;
+    }
+    return clase;
+}
+
 clase_t Knn (const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, const vector<double>& newImg, uint k) {//las labels podrian no ser un uint pero lo dejo asi en un principio
     vector<pair<double,clase_t> > vecNormas (trainX.size());
     for (uint i = 0; i < labelsX.size(); i++) {

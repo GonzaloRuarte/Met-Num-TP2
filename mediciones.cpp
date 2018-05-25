@@ -523,6 +523,129 @@ void kFoldDarkSat (const vector<vector<double> >& trainX, const vector<clase_t>&
     }
 }
 
+void kfold_para_imagenes_aleatorios(const vector<vector<double>>& dataSetTest, uint alpha, uint variacion_alpha, unsigned char cant_ks){
+    //Se asume que en dataSetTest todas las imágenes correspondientes a una misma distribución vienen en posiciones contiguas.
+    unsigned short int cant_distribs_aleats = 2;
+    unsigned short int cant_imag_de_cada_distribucion = 100;
+    unsigned short int cant_folds = 5;
+    unsigned short int cant_para_test = cant_distribs_aleats*(cant_imag_de_cada_distribucion/cant_folds);
+    unsigned short int cant_para_train = cant_distribs_aleats*cant_imag_de_cada_distribucion - cant_para_test;
+    cout << "cout funciona" << endl;
+    vector<vector<double> > trainX(cant_para_train);
+    vector<clase_t> labelsX(cant_para_train);
+    vector<vector<double> > testY(cant_para_test);
+    vector<clase_t> labelsY(cant_para_test);
+    unsigned char cant_alphas_mas_uno = 1+ (alpha+variacion_alpha-1)/variacion_alpha; //Más 1 por el caso sin PCA.
+    resultados result_por_fold[cant_alphas_mas_uno][cant_ks][cant_distribs_aleats];
+    for(uint i = 0; i < cant_alphas_mas_uno; ++i)
+        for(uint j = 0; j < cant_ks; ++j)
+            for(uint k = 0; k < cant_distribs_aleats;++k)
+                result_por_fold[i][j][k] = {0, 0, 0, 0};
+    double accur_por_fold[cant_alphas_mas_uno][cant_ks];
+    for(uint i = 0; i < cant_alphas_mas_uno; ++i)
+        for(uint j = 0; j < cant_ks; ++j)
+            accur_por_fold[i][j] = 0;
+    ofstream salida;
+    string nombreArch;
+    for(unsigned char fold = 0; fold < cant_folds; ++fold){
+        unsigned short int tamanio_foldD = cant_imag_de_cada_distribucion/cant_folds;    //foldD = la parte de un fold que corresponde a una misma distribución.
+        unsigned short int comienzo_foldD = fold*tamanio_foldD;
+        unsigned short int fin_foldD = comienzo_foldD + tamanio_foldD;
+        for(unsigned short int i = 0; i < cant_imag_de_cada_distribucion; ++i){
+            for(unsigned short int distrib = 0; distrib < cant_distribs_aleats; ++distrib) {
+                unsigned short int corrimiento;
+                if (comienzo_foldD <= i) {
+                    if (i < fin_foldD) {
+                        corrimiento = tamanio_foldD * distrib;
+                        testY[i-comienzo_foldD + corrimiento] = dataSetTest[i + distrib*cant_imag_de_cada_distribucion];
+                        labelsY[i-comienzo_foldD + corrimiento] = distrib;
+                    } else {
+                        corrimiento = (cant_imag_de_cada_distribucion - tamanio_foldD) * distrib;
+                        trainX[i-tamanio_foldD + corrimiento] = dataSetTest[i + distrib*cant_imag_de_cada_distribucion];
+                        labelsX[i-tamanio_foldD + corrimiento] = distrib;
+                    }
+                } else{
+                    corrimiento = (cant_imag_de_cada_distribucion - tamanio_foldD) * distrib;
+                    trainX[i + corrimiento] = dataSetTest[i + distrib*cant_imag_de_cada_distribucion];
+                    labelsX[i + corrimiento] = distrib;
+                }
+            }
+        }
+        vector<clase_t> predicciones[cant_ks];
+        for(unsigned char lalala = 0; lalala < cant_ks; ++lalala)
+            predicciones[lalala] = vector<clase_t>(cant_para_test);
+
+        //Sin PCA
+        for(unsigned short int test = 0; test < cant_para_test; ++test){
+            vector<pair<double, clase_t > > vec_dist = vector_de_distancias(trainX, labelsX, testY[test]);
+            for(uint k = 0; k < cant_ks; ++k){
+                predicciones[k][test] = Knn_sim(vec_dist, 1+4*k);
+                if(predicciones[k][test] == 1){
+                    cout << "Pasó por 1" << endl;
+                    salida.open("aciertos_de_rands.txt", ios::app);
+                    unsigned short num_img = fold*tamanio_foldD + test;
+                    salida << "Fold=" << to_string(fold) << ", sin PCA y k=" << to_string(k) << ":\t" << to_string(num_img) << endl;
+                }
+            }
+        }
+        for(uint k = 0; k < cant_ks; ++k){
+            for(unsigned short int distrib = 0; distrib < cant_distribs_aleats; ++distrib){
+                result_por_fold[0][k][distrib].precision += precision(labelsY, distrib, predicciones[k]);
+                result_por_fold[0][k][distrib].recall += recall(labelsY, distrib, predicciones[k]);
+            }
+            accur_por_fold[0][k] += accuracy(labelsY, predicciones[k]);
+        }
+        //Con PCA
+        vector<vector<double> > V = PCATecho(trainX, alpha);
+        vector<vector<double> > trans_trainX(cant_para_train);
+        vector<vector<double> > trans_testY(cant_para_test);
+        unsigned char indice_de_alpha = 1;
+        uint alpha2 = alpha;
+        while(alpha2 > 0){
+            for(uint j = 0; j < V.size(); ++j)  //Me quedo con alpha columnas.
+                V[j].erase(V[j].begin()+alpha2, V[j].end());
+            trans_trainX = multMat(trainX, V);
+            trans_testY = multMat(testY, V);
+            for(uint test = 0; test < testY.size(); ++test){
+                vector<pair<double, clase_t> > vec_dist = vector_de_distancias(trans_trainX, labelsX, trans_testY[test]);
+                for(uint k = 0; k < cant_ks; ++k){
+                    predicciones[k][test] = Knn_sim(vec_dist, 1+4*k);
+                    if(predicciones[k][test] == 1){
+                        cout << "Pasó por 2" << endl;
+                        salida.open("aciertos_de_rands.txt", ios::app);
+                        unsigned short num_img = fold*tamanio_foldD + test;
+                        salida << "Fold=" << to_string(fold) << ", alpha=" << to_string(alpha2)  << " y k=" << to_string(k) << ":\t" << to_string(num_img) << endl;
+                    }
+                }
+            }
+            for(uint k = 0; k < cant_ks; ++k){
+                for(unsigned short int distrib = 0; distrib < cant_distribs_aleats; ++distrib){
+                    result_por_fold[indice_de_alpha][k][distrib].precision += precision(labelsY, distrib, predicciones[k]);
+                    result_por_fold[indice_de_alpha][k][distrib].recall += recall(labelsY, distrib, predicciones[k]);
+                }
+                accur_por_fold[indice_de_alpha][k] += accuracy(labelsY, predicciones[k]);
+            }
+            alpha2 -= variacion_alpha;
+            ++indice_de_alpha;
+        }
+    }
+    for(unsigned char alphas = 0; alphas < cant_alphas_mas_uno; ++alphas){
+        for(unsigned char kes = 0; kes < cant_ks; ++kes){
+            if(alphas == 0)
+                nombreArch = "./imgs_aleats/sin_PCA-k_" + to_string(1+4*kes) + ".txt";
+            else
+                nombreArch = "./imgs_aleats/alpha_" + to_string(alpha) + "-k_" + to_string(1+4*kes) + ".txt";
+            salida.open(nombreArch, ios::out);
+            for(unsigned char distris = 0; distris < cant_distribs_aleats; ++distris)
+                salida << result_por_fold[alphas][kes][distris].precision/cant_folds << "\t" << result_por_fold[alphas][kes][distris].recall/cant_folds << endl;
+            salida << accur_por_fold[alphas][kes]/cant_folds;
+            salida.close();
+        }
+        if(alphas == 0)
+            alpha -= variacion_alpha;
+    }
+}
+
 void medirTiempos (const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, uint k, uint kdeKnn, uint alpha, bool conPCA, bool varioAlpha) {
     //codigo para calcular la cantidad de imagenes por persona suponiendo que las muestras son balanceadas y la cantidad de clases
     uint imagenesPorPersona = 0;
@@ -959,7 +1082,7 @@ void escribirDatosTamMatriz(string nombreArchivo, vector<pair<vector<resultados 
     }
 }
 
-void kfoldTamDataset(const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, uint k){
+voidkfoldTamDataset(const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, uint k){
     uint imagenesPorPersona = 0;
     int imagenesPPparagenerador = 0;
     uint cantidadDeClases = 0;
