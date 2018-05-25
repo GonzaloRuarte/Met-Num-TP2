@@ -970,6 +970,199 @@ vector<pair<vector<resultados >,double> > kFold (const vector<vector<double> >& 
 	}
 	return res;	
 }
+void kFoldDark (const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, uint k) {
+//codigo para calcular la cantidad de imagenes por persona suponiendo que las muestras son balanceadas y la cantidad de clases
+	uint imagenesPorPersona = 0;
+	int imagenesPPparagenerador = 0;
+	uint cantidadDeClases = 0;
+	uint personasTemp = 0;
+	for( uint i = 0; i < labelsX.size(); i++){
+		if (labelsX[i] != personasTemp){
+			personasTemp = labelsX[i];
+			cantidadDeClases++;
+		}
+		if(personasTemp == 1){
+			imagenesPorPersona++;
+			imagenesPPparagenerador++;
+		}
+	}
+//***********************************************************************//
+	uint n = trainX.size()/imagenesPorPersona; //n es la cantidad de personas
+	vector<int> folds(imagenesPorPersona); //to store the random numbers
+	for(uint i = 0; i < imagenesPorPersona; ++i){
+        	folds[i] = i;
+	}
+    	vector< vector<int>> foldsXpersona (n);
+	mt19937 g(static_cast<uint32_t>(time(0)));
+	for (uint i = 0; i<n;++i){
+		shuffle(folds.begin(), folds.end(),g);
+		foldsXpersona[i] = folds;
+	}
+/*	random_device rd; //seed generator
+	mt19937_64 generator{rd()}; //generator initialized with seed from rd
+	uniform_int_distribution<> dist{0, imagenesPPparagenerador-1}; //the range is inclusive, so this produces numbers in range [0, 10)
+	for(uint i=0; i<imagenesPorPersona; ++i) {  //REPITE NÚMEROS
+		folds.push_back( dist(generator) );
+	} // la idea es que voy a tener muestras balanceadas, entonces para cada persona voy a tener la misma cantidad de imagenes en test y en train
+		// como cada persona tiene 10 imagenes, el k puede ser 1, 2, 5 o 10, k = 1 no tiene mucho sentido*/
+	vector<pair<vector<resultados >,double> > res;
+	for(uint i = 0; i<k; i++){ //itero sobre la cantidad de folds
+		vector<vector<double> > trainXTemp;
+		vector<vector<double> > testYTemp;
+		vector<uint> labelsXTemp;
+		vector<uint> labelsYTemp;
+		for (uint j = 0; j < n; j++){ //itero sobre la cantidad de personas
+			for (uint u = 0; u < imagenesPorPersona; u++) {//itero sobre la cantidad de imagenes por persona
+				uint temp = (j*imagenesPorPersona)+foldsXpersona[j][u];
+				if (u >= i*imagenesPorPersona/k && u < (i+1)*imagenesPorPersona/k){ //si estoy en el fold que quiero
+					testYTemp.push_back(trainX[temp]);
+					labelsYTemp.push_back(labelsX[temp]); //agrego el elemento a test
+				} else{ 
+					trainXTemp.push_back(trainX[temp]);
+					labelsXTemp.push_back(labelsX[temp]); //agrego el elemento a train
+				}
+
+			}
+		}
+
+				vector<vector<double>> V = PCATecho(trainXTemp,31); 
+				vector<pair<vector<resultados >,double> > resVariandoDarkParaUnFold;
+				vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
+				for(uint y = 1; y <= 10; ++y) { //este for seria para variar lo que oscurece
+					
+					vector<vector<double> > testYTemp2 = testYTemp;
+					multMatEsc(testYTemp2,y*0.10);
+					testYTemp2 = multMat(testYTemp2,V);
+					vector<resultados > resultadosTemp (0);
+					vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,1);
+					for (uint j = 1; j <= cantidadDeClases; j++){ //itero sobre las clases
+						resultados resXClase;
+						resXClase.precision = precision(labelsYTemp,j,vectordeKnns);
+						resXClase.recall = recall(labelsYTemp,j,vectordeKnns);
+						if (resXClase.precision+resXClase.recall > 0){
+							resXClase.f1 = 2.0*resXClase.precision*resXClase.recall/(resXClase.precision+resXClase.recall);
+					}
+						else {
+							resXClase.f1 = 0;
+						}
+						resXClase.clase = j;
+						resultadosTemp.push_back(resXClase);
+					}//entonces en el vector la posicion 0 corresponde a la clase 1 y asi sucesivamente
+					double accuracyTemp = accuracy(labelsYTemp,vectordeKnns);
+					resVariandoDarkParaUnFold.push_back(make_pair(resultadosTemp,accuracyTemp));
+				} //aca terminaria el for que varia el kDeKnn
+				
+		
+		
+		escribirEstadisiticas("./Resultados/ResultadosDark/ResultadosDark", resVariandoDarkParaUnFold,i,1,false,20,1,true);
+//si usas esta funcion el nombre de los archivos va a ser cualquier cosa pero bue jaja
+		//de ultima hayque hacer otra funcion para que escriba bien el nombre de los archivos
+			
+		
+	}
+
+}
+
+void kFoldDarkSat (const vector<vector<double> >& trainX, const vector<clase_t>& labelsX, uint k) {
+//codigo para calcular la cantidad de imagenes por persona suponiendo que las muestras son balanceadas y la cantidad de clases
+	uint imagenesPorPersona = 0;
+	int imagenesPPparagenerador = 0;
+	uint cantidadDeClases = 0;
+	uint personasTemp = 0;
+	for( uint i = 0; i < labelsX.size(); i++){
+		if (labelsX[i] != personasTemp){
+			personasTemp = labelsX[i];
+			cantidadDeClases++;
+		}
+		if(personasTemp == 1){
+			imagenesPorPersona++;
+			imagenesPPparagenerador++;
+		}
+	}
+//***********************************************************************//
+	uint n = trainX.size()/imagenesPorPersona; //n es la cantidad de personas
+	vector<int> folds(imagenesPorPersona); //to store the random numbers
+	for(uint i = 0; i < imagenesPorPersona; ++i){
+        	folds[i] = i;
+	}
+    	vector< vector<int>> foldsXpersona (n);
+	mt19937 g(static_cast<uint32_t>(time(0)));
+	for (uint i = 0; i<n;++i){
+		shuffle(folds.begin(), folds.end(),g);
+		foldsXpersona[i] = folds;
+	}
+/*	random_device rd; //seed generator
+	mt19937_64 generator{rd()}; //generator initialized with seed from rd
+	uniform_int_distribution<> dist{0, imagenesPPparagenerador-1}; //the range is inclusive, so this produces numbers in range [0, 10)
+	for(uint i=0; i<imagenesPorPersona; ++i) {  //REPITE NÚMEROS
+		folds.push_back( dist(generator) );
+	} // la idea es que voy a tener muestras balanceadas, entonces para cada persona voy a tener la misma cantidad de imagenes en test y en train
+		// como cada persona tiene 10 imagenes, el k puede ser 1, 2, 5 o 10, k = 1 no tiene mucho sentido*/
+	vector<pair<vector<resultados >,double> > res;
+	for(uint i = 0; i<k; i++){ //itero sobre la cantidad de folds
+		vector<vector<double> > trainXTemp;
+		vector<vector<double> > testYTemp;
+		vector<uint> labelsXTemp;
+		vector<uint> labelsYTemp;
+		for (uint j = 0; j < n; j++){ //itero sobre la cantidad de personas
+			for (uint u = 0; u < imagenesPorPersona; u++) {//itero sobre la cantidad de imagenes por persona
+				uint temp = (j*imagenesPorPersona)+foldsXpersona[j][u];
+				if (u >= i*imagenesPorPersona/k && u < (i+1)*imagenesPorPersona/k){ //si estoy en el fold que quiero
+					testYTemp.push_back(trainX[temp]);
+					labelsYTemp.push_back(labelsX[temp]); //agrego el elemento a test
+				} else{ 
+					trainXTemp.push_back(trainX[temp]);
+					labelsXTemp.push_back(labelsX[temp]); //agrego el elemento a train
+				}
+
+			}
+		}
+
+				vector<vector<double>> V = PCATecho(trainXTemp,31); 
+				vector<pair<vector<resultados >,double> > resVariandoDarkParaUnFold;
+				vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
+				for(uint y = 0; y <= 9; ++y) { //este for seria para variar lo que oscurece, primera iteracion lo dejo como esta y la ultima le resto 180 a todos
+					
+					vector<vector<double> > testYTemp2 = testYTemp;
+					for(uint o = 0; o < testYTemp2.size(); ++o){
+						for(uint h = 0; h < testYTemp2[0].size(); ++h){
+							testYTemp2[o][h]-=20*y;
+							if (testYTemp2[o][h]< 0){
+								testYTemp2[o][h]=0;
+							}
+						}
+					}
+					testYTemp2 = multMat(testYTemp2,V);
+					vector<resultados > resultadosTemp (0);
+					vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,1);
+					for (uint j = 1; j <= cantidadDeClases; j++){ //itero sobre las clases
+						resultados resXClase;
+						resXClase.precision = precision(labelsYTemp,j,vectordeKnns);
+						resXClase.recall = recall(labelsYTemp,j,vectordeKnns);
+						if (resXClase.precision+resXClase.recall > 0){
+							resXClase.f1 = 2.0*resXClase.precision*resXClase.recall/(resXClase.precision+resXClase.recall);
+					}
+						else {
+							resXClase.f1 = 0;
+						}
+						resXClase.clase = j;
+						resultadosTemp.push_back(resXClase);
+					}//entonces en el vector la posicion 0 corresponde a la clase 1 y asi sucesivamente
+					double accuracyTemp = accuracy(labelsYTemp,vectordeKnns);
+					resVariandoDarkParaUnFold.push_back(make_pair(resultadosTemp,accuracyTemp));
+				} //aca terminaria el for que varia el kDeKnn
+				
+		
+		
+		escribirEstadisiticas("./Resultados/ResultadosDarkSat/ResultadosDarkSat", resVariandoDarkParaUnFold,i,10,true,20,1,true);
+//si usas esta funcion el nombre de los archivos va a ser cualquier cosa pero bue jaja
+		//de ultima hayque hacer otra funcion para que escriba bien el nombre de los archivos
+			
+		
+	}
+
+}
+
 
 //**********************Codigo para la matriz de confusion **************//
 			/*	uint vector_size = vectordeKnns.size();
@@ -1391,7 +1584,9 @@ vector<vector< vector<uint> > > kfoldmatConf(const vector<vector<double> >& trai
 		}
 		vector<vector<double>> V = PCATecho(trainXTemp,31); 
 		vector<vector<double> > trainXTemp2 = multMat(trainXTemp,V);
-		vector<vector<double> > testYTemp2 = multMat(testYTemp,V);
+		vector<vector<double> > testYTemp2 = testYTemp;
+		multMatEsc(testYTemp2,0.5);
+		testYTemp2 = multMat(testYTemp,V);
 		vector<uint> vectordeKnns = vectorDeKnns(trainXTemp2,labelsXTemp,testYTemp2,1);
 		
 //**********************Codigo para la matriz de confusion **************//
@@ -1697,13 +1892,21 @@ int main(int argc, char * argv[]) {
         vector<vector<double>>* dataSetTest = new vector<vector<double> >;
         vector<uint>* labelsTest = new vector<uint>;
         vector<double>* autovaloresTest = new vector<double>;
-        //cargarTest("./tests/testFullBig", dataSetTest, labelsTest, autovaloresTest);
-        cargarTest_aleat(dataSetTest, false);
+        cargarTest("./tests/testFullBig", dataSetTest, labelsTest, autovaloresTest);
+        //cargarTest_aleat(dataSetTest, false);		<<<<<<<<<<< Este es para las imagenes aleatorias
         //------- cargamos los datos de uno de los tests en la funcion cargarTest esta la explicacion de que hace-------------------//
 
 		//testDistorted(*dataSetTest,*labelsTest,5);
-        kfold_para_imagenes_aleatorios(*dataSetTest, 80, 20, 10);
+        //kfold_para_imagenes_aleatorios(*dataSetTest, 80, 20, 10);
 
+		vector<vector< vector<uint> > > matrices = kfoldmatConf(*dataSetTest,*labelsTest,5);
+		vector< vector<uint> > matriz(matrices[0].size(), vector<uint>(matrices[0][0].size(),0));
+		for(int i = 0; i < matriz.size(); i++) {
+			for(int j = 0; i < matriz[0].size(); i++) {
+				matriz[i][j] = (matrices[0][i][j] + matrices[1][i][j] + matrices[2][i][j] + matrices[3][i][j] + matrices[4][i][j])/5;
+			}
+		}
+		escribirMatrizDeConfusion("./MatrizConfusionDark",matriz);
 		delete dataSetTest;
 		delete labelsTest;
 		delete autovaloresTest;
