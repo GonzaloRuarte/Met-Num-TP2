@@ -1,6 +1,26 @@
 #ifndef PPMLOADER_UTIL_H
 #define PPMLOADER_UTIL_H
 
+#include <string>
+#include <iostream>
+#include <fstream>
+#include "ppmloader.h"
+#include "dirent.h"
+#include <vector>
+#include <stdio.h>
+#include <map>
+#include <sys/stat.h>
+#include <sstream>
+
+typedef uint clase_t;
+
+typedef struct {
+    clase_t clase;
+    double precision;
+    double recall;
+    double f1;
+} resultados;
+
 using namespace std;
 
 void cargarDataSetEnMatriz(string pathAlDataSet, vector<vector<double>>* dataSet, vector<uint>* labelsX);
